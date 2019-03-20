@@ -1,3 +1,5 @@
 # Peer-Learning
 
-Now this is a version based on a flask tutorial by inkjet: https://github.com/inkjet/flask-aws-tutorial
+This is a early version of the web app for CS411 from group smileyface :)
+
+Still under constrction!
