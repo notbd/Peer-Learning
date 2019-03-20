@@ -2,7 +2,7 @@
 # The other elements are the same as used in the tutorial
 # format: (user):(password)@(db_identifier).amazonaws.com:3306/(db_name)
 
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://smileyface:cs411project@rds-mysql-411project.csfttfyvdoqe.us-east-1.rds.amazonaws.com:3306/rds-mysql-411project'
+SQLALCHEMY_DATABASE_URI = 'smileyface:cs411project@rds-mysql-411project.amazonaws.com:3306/rds-mysql-411project'
 
 # Uncomment the line below if you want to work with a local DB
 #SQLALCHEMY_DATABASE_URI = 'sqlite:///test.db'
