@@ -111,8 +111,11 @@ def instructor_dashboard():
     if flask_login.current_user.type == STUDENT:
         return "it's a student, not an instructor"
 
-    return 'Logged in as: [%s] %s' % (flask_login.current_user.email, flask_login.current_user.name)
+    return render_template("instructor_dashboard.html", current_user=flask_login.current_user)
+    # return 'Logged in as: [%s] %s' % (flask_login.current_user.email, flask_login.current_user.name)
 
+# @application.route('/course', methods=['POST'])
+# def course():
 
 @login_manager.user_loader
 def user_loader(email):

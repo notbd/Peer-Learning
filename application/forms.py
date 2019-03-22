@@ -2,9 +2,9 @@ from flask.ext.wtf import Form
 from wtforms import StringField, RadioField, PasswordField, validators
 from wtforms.fields.html5 import EmailField
 
-
 INSTRUCTOR = 'instructor'
 STUDENT = 'student'
+
 
 class EnterDBInfo(Form):
     dbNotes = StringField(label='Items to add to DB', description="db_enter", validators=[validators.required(),
@@ -24,10 +24,15 @@ class RetrieveDBInfo(Form):
 class SignUpForm(Form):
     user_type = RadioField(label="User Type", choices=[(STUDENT, STUDENT), (INSTRUCTOR, INSTRUCTOR)])
     name = StringField(label='Name', description="name", validators=[validators.Length(min=1, max=80,
-                                                                                                  message=u'Name needs to be 1-80 character(s) long')])
+                                                                                       message=u'Name needs to be 1-80 character(s) long')])
     email = EmailField(label='Email address', validators=[validators.DataRequired(), validators.Email()])
     password = PasswordField(label='Password')
+
 
 class LogInForm(Form):
     email = EmailField(label='Email address', validators=[validators.DataRequired(), validators.Email()])
     password = PasswordField(label='Password')
+
+
+class AddCourseForm(Form):
+    pass
