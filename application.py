@@ -63,7 +63,8 @@ def signup():
     if request.method == 'POST':
         if not form.validate():
             return form.errors
-        user = User(name=form.name.data, email=form.email.data, password=form.password.data, type=form.user_type.data)
+        user = User(email=form.email.data, password=form.password.data, user_type=form.user_type.data,
+                    name=form.name.data)
         user_repr = str(user)
         try:
             db.session.add(user)
@@ -105,10 +106,10 @@ def login():
 
 @application.route('/dashboard/instructor', methods=['GET', 'POST'])
 def instructor_dashboard():
-    if flask_login.current_user is None:
-        return redirect(url_for('/login'))
+    if flask_login.current_user is None or flask_login.current_user.is_anonymous:
+        return redirect(url_for('login'))
 
-    if flask_login.current_user.type == STUDENT:
+    if flask_login.current_user.user_type == STUDENT:
         return "it's a student, not an instructor"
 
     return render_template("instructor_dashboard.html", current_user=flask_login.current_user)

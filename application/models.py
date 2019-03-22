@@ -15,16 +15,17 @@ class Data(db.Model):
 
 
 class User(UserMixin, db.Model):
+    __tablename__ = 'user'
     email = db.Column(db.String(120), primary_key=True)
     name = db.Column(db.String(80), unique=False, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
-    type = db.Column(db.String(50))
+    user_type = db.Column(db.String(50))
 
-    def __init__(self, email, password, type="", name=""):
+    def __init__(self, email, password, user_type="", name=""):
         self.email = email
         self.name = name
         self.password = password
-        self.type = type
+        self.user_type = user_type
 
     def get_id(self):
         return self.email
@@ -33,4 +34,19 @@ class User(UserMixin, db.Model):
         return True
 
     def __repr__(self):
-        return '<User\tname: %s\temail: %s\tpassword: %s\ttype: %s>' % (self.name, self.email, self.password, self.type)
+        return '<User\tname: %s\temail: %s\tpassword: %s\ttype: %s>' % (
+        self.name, self.email, self.password, self.user_type)
+
+class Course(db.Model):
+    CRN = db.Column(db.String(120), primary_key=True)
+    title = db.Column(db.String(80), nullable=False)
+    year = db.Column(db.Integer, nullable=False)
+    term = db.Column(db.String(10), nullable=False)
+    instructor = db.Column(db.String(120), db.ForeignKey('user.email'))
+
+    def __init__(self, CRN, title, year, term, instructor):
+        self.CRN = CRN
+        self.year = year
+        self.title = title
+        self.term = term
+        self.instructor = instructor
