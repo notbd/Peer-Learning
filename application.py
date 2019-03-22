@@ -114,10 +114,21 @@ def instructor_dashboard():
         return redirect(url_for('login'))
 
     if flask_login.current_user.user_type == STUDENT:
-        return "it's a student, not an instructor"
+        return redirect(url_for('student_dashboard'))
 
     return render_template("instructor_dashboard.html", current_user=flask_login.current_user)
-    # return 'Logged in as: [%s] %s' % (flask_login.current_user.email, flask_login.current_user.name)
+
+
+@application.route('/dashboard/student', methods=['GET'])
+def student_dashboard():
+    if flask_login.current_user is None or flask_login.current_user.is_anonymous:
+        return redirect(url_for('login'))
+
+    if flask_login.current_user.user_type == INSTRUCTOR:
+        return redirect(url_for('instructor_dashboard'))
+
+    return "student dashboard not yet implemented"
+
 
 # @application.route('/course', methods=['POST'])
 # def course():
