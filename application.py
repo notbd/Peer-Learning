@@ -95,16 +95,20 @@ def login():
             if queried_user.password != user.password:
                 return "Wrong password."
             flask_login.login_user(queried_user)
+            redirect_endpoint = "instructor_dashboard" if queried_user.user_type == INSTRUCTOR else "student_dashboard"
             db.session.close()
-            return "login successful."
+            return redirect(url_for(redirect_endpoint))
         except Exception as e:
             return str(e)
     else:
         return render_template("login.html", form=form)
 
+@application.route('/logout', methods=['POST'])
+def logout():
+    flask_login.logout_user()
+    return redirect(url_for("login"))
 
-
-@application.route('/dashboard/instructor', methods=['GET', 'POST'])
+@application.route('/dashboard/instructor', methods=['GET'])
 def instructor_dashboard():
     if flask_login.current_user is None or flask_login.current_user.is_anonymous:
         return redirect(url_for('login'))

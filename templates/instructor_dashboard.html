@@ -1,14 +1,6 @@
 {% extends "base.html" %} {% import 'macros.html' as macros %}
 {% block content %}
 
-<div class="col-md-4 col-md-offset-4">
-
-      <div align="center">
-        <h2>Instructor Dashboard</h2>
-      </div>
-
-<hr>
-
 <style>
 #AddCourseForm{
 	display: none;
@@ -17,6 +9,7 @@
     padding: 14px;
     background: #ececec;
 }
+
 </style>
 
 <script>
@@ -26,6 +19,18 @@ $(document).ready(function(){
   });
 });
 </script>
+
+<form action="/logout" method="post">
+    <button type="submit" style="float: right;">Log Out</button>
+</form>
+
+<div class="col-md-4 col-md-offset-4">
+
+      <div align="center">
+        <h2>Instructor Dashboard</h2>
+      </div>
+
+<hr>
 
 <h4>Courses for {{current_user.name}}</h4>
 <br>
