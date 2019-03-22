@@ -1,4 +1,4 @@
-from application import db, login_manager
+from application import db
 from flask_login import LoginManager, UserMixin, \
     login_required, login_user, logout_user
 
@@ -20,20 +20,17 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(80), unique=False, nullable=False)
     type = db.Column(db.String(50))
 
-    def __init__(self, email, name, password, type):
+    def __init__(self, email, password, type="", name=""):
         self.email = email
         self.name = name
         self.password = password
         self.type = type
 
+    def get_id(self):
+        return self.email
+
+    def is_authenticated(self):
+        return True
+
     def __repr__(self):
         return '<User\tname: %s\temail: %s\tpassword: %s\ttype: %s>' % (self.name, self.email, self.password, self.type)
-
-@login_manager.user_loader
-def user_loader(email):
-    return User.query.get(email)
-
-#
-#
-# @login_manager.request_loader
-# def request_loader(request):
