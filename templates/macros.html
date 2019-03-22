@@ -14,7 +14,7 @@
         {% if (field.type != 'HiddenField' or field.type !='CSRFTokenField') and label_visible %}
             <label for="{{ field.id }}" class="control-label">{{ field.label }}</label>
         {% endif %}
-        {% if field.type == 'TextField' %}
+        {% if field.type in ['TextField', 'StringField', 'EmailField', 'PasswordField']%}
             {{ field(class_='form-control', **kwargs) }}
         {% endif %}
         {% if field.errors %}
@@ -45,7 +45,7 @@
 {% macro render_date_field(field) -%}
     <div class="date">
         <label>
-            {{ field(class_=class_) }} 
+            {{ field(class_=class_) }}
         </label>
     </div>
 {%- endmacro %}
@@ -62,8 +62,15 @@
 {% macro render_radio_field(field) -%}
 
     <div class="control-group {% if field.errors %}error{% endif %}">
-
-    {{ field(class_=class_) }}
+    <label>
+        {{ field.label }}
+    </label> <br>
+    {% for subfield in field %}
+        <tr>
+            <td>{{ subfield }}</td>
+            <td>{{ subfield.label }}</td>
+        </tr>
+    {% endfor %}
     {% if field.errors %}
         <span class="error help-inline" style="color: red;">{{ field.errors|join(', ') }}</span>
     {% endif %}

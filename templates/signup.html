@@ -1,0 +1,27 @@
+{% extends "base.html" %} {% import 'macros.html' as macros %}
+{% block content %}
+
+<div class="col-md-4 col-md-offset-4">
+
+      <div align="center">
+        <h2>Group :) Demo</h2>
+      </div>
+
+<hr>
+
+<form method="post" action="/signup"  id="db_post" name="db_post">
+
+    {{ form.hidden_tag() }}
+
+    {{ macros.render_radio_field(form.user_type) }}
+    {{ macros.render_field(form.name, placeholder='Name', type='name', label_visible=true) }}
+    {{ macros.render_field(form.email, placeholder='abc@illinois.edu', type='email', label_visible=true) }}
+    {{ macros.render_field(form.password, type='password', label_visible=true) }}
+
+    <div align="center"><button type="submit" class="btn btn-primary">Sign Up</button></p></div>
+
+</form>
+
+</div>
+
+{% endblock %}
