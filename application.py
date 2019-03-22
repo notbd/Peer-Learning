@@ -9,7 +9,7 @@ Step-by-step tutorial: https://medium.com/@rodkey/deploying-a-flask-application-
 
 from flask import Flask, render_template, request, redirect, url_for
 from application import db
-from application.models import Data, User
+from application.models import *
 from application.forms import *
 import flask_login
 
@@ -25,6 +25,7 @@ login_manager.login_view = 'login'
 
 INSTRUCTOR = 'instructor'
 STUDENT = 'student'
+
 
 @application.route('/', methods=['GET', 'POST'])
 @application.route('/index', methods=['GET', 'POST'])
@@ -76,7 +77,7 @@ def signup():
             return str(e)
         return render_template('thanks.html', notes=user_repr)
 
-    else: # GET
+    else:  # GET
         return render_template("signup.html", form=form)
 
 
@@ -103,12 +104,14 @@ def login():
     else:
         return render_template("login.html", form=form)
 
+
 @application.route('/logout', methods=['POST'])
 def logout():
     flask_login.logout_user()
     return redirect(url_for("login"))
 
-@application.route('/dashboard/instructor', methods=['GET'])
+
+@application.route('/dashboard/instructor/courses', methods=['GET', 'POST'])
 def instructor_dashboard():
     if flask_login.current_user is None or flask_login.current_user.is_anonymous:
         return redirect(url_for('login'))
@@ -116,7 +119,36 @@ def instructor_dashboard():
     if flask_login.current_user.user_type == STUDENT:
         return redirect(url_for('student_dashboard'))
 
-    return render_template("instructor_dashboard.html", current_user=flask_login.current_user)
+    add_course_form = CourseInfoForm(request.form)
+
+    if request.method == 'POST':
+        if not add_course_form.validate():
+            return str(add_course_form.errors)
+
+        c = Course(CRN=add_course_form.CRN.data, title=add_course_form.title.data, year=add_course_form.year.data,
+                   term=add_course_form.term.data,
+                   instructor=flask_login.current_user.email)
+        print(c)
+        try:
+            db.session.add(c)
+            db.session.commit()
+            db.session.close()
+        except Exception as e:
+            db.session.rollback()
+            # TODO: render form with error msg
+            return str(e)
+        return redirect(url_for('instructor_dashboard'))
+    elif request.method == 'GET':
+        try:
+            courses = Course.query.filter_by(instructor=flask_login.current_user.email)
+            return render_template("instructor_dashboard.html", current_user=flask_login.current_user, courses=courses,
+                                   add_course_form=add_course_form)
+        except Exception as e:
+            db.session.rollback()
+            return str(e)
+
+    return render_template("instructor_dashboard.html", current_user=flask_login.current_user,
+                           add_course_form=add_course_form)
 
 
 @application.route('/dashboard/student', methods=['GET'])
@@ -127,11 +159,8 @@ def student_dashboard():
     if flask_login.current_user.user_type == INSTRUCTOR:
         return redirect(url_for('instructor_dashboard'))
 
-    return "student dashboard not yet implemented"
+    return render_template("student_dashboard.html", current_user=flask_login.current_user)
 
-
-# @application.route('/course', methods=['POST'])
-# def course():
 
 @login_manager.user_loader
 def user_loader(email):
@@ -140,4 +169,3 @@ def user_loader(email):
 
 if __name__ == '__main__':
     application.run(host='0.0.0.0')
-

@@ -1,5 +1,5 @@
 from flask.ext.wtf import Form
-from wtforms import StringField, RadioField, PasswordField, validators
+from wtforms import StringField, RadioField, PasswordField, IntegerField, validators
 from wtforms.fields.html5 import EmailField
 
 INSTRUCTOR = 'instructor'
@@ -34,5 +34,8 @@ class LogInForm(Form):
     password = PasswordField(label='Password')
 
 
-class AddCourseForm(Form):
-    pass
+class CourseInfoForm(Form):
+    CRN = IntegerField(label='CRN')
+    title = StringField(label='Course Title')
+    year = IntegerField(label='Year')
+    term = StringField(label='Term')

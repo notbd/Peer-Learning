@@ -10,6 +10,19 @@
     background: #ececec;
 }
 
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+
 </style>
 
 <script>
@@ -27,20 +40,43 @@ $(document).ready(function(){
 <div class="col-md-4 col-md-offset-4">
 
       <div align="center">
-        <h2>Instructor Dashboard</h2>
+        <h2>Instructor Dashboard for {{current_user.name}}</h2>
       </div>
 
 <hr>
 
-<h4>Courses for {{current_user.name}}</h4>
+<h4>Courses</h4>
+    <table>
+    <tbody>
+    <tr>
+        <td>CRN</td>
+        <td>title</td>
+        <td>year</td>
+        <td>term</td>
+    </tr>
+      {% for c in courses %}
+        <tr>
+          <td>{{ c.CRN }}</td>
+          <td>{{ c.title }}</td>
+          <td>{{ c.year }}</td>
+          <td>{{ c.term }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+    </table>
 <br>
 <button id="AddCourseBtn" class="btn btn-primary">Add Course</button>
-<form id="AddCourseForm" action="/class" method="post">
-  	<!--<label>Enter Name</label>-->
+<form id="AddCourseForm" action="/dashboard/instructor/courses" method="post">
+    {{ add_course_form.hidden_tag() }}
+    {{ macros.render_field(add_course_form.CRN, placeholder='24521', label_visible=true) }}
+    {{ macros.render_field(add_course_form.title, placeholder='CS 411', label_visible=true) }}
+    {{ macros.render_field(add_course_form.year, placeholder='2019', label_visible=true) }}
+    {{ macros.render_field(add_course_form.term, placeholder='spring', label_visible=true) }}
+    <!--<label>Enter Name</label>-->
 	<!--<input type="text" name="name" placeholder="Enter your name"/></br>-->
   	<!--<label>Enter Email</label>-->
 	<!--<input type="email" name="email" placeholder="Enter your email"/></br>-->
-  	<!--<input type="button" class="btn btn-default" name="submit" value="Submit"/>-->
+    <button type="submit" class="btn btn-default">Submit</button>
 </form>
 </div>
 
