@@ -68,7 +68,12 @@ def signup():
                     name=form.name.data)
         user_repr = str(user)
         try:
-            db.session.add(user)
+            # db.session.add(user)
+            db.session.execute(
+                'INSERT INTO user '
+                '(email, password, name, user_type) '
+                'VALUES ("%s", "%s", "%s", "%s")' %
+                (user.email, user.password, user.name, user.user_type))
             db.session.commit()
             db.session.close()
         except Exception as e:
@@ -90,12 +95,14 @@ def login():
             return form.errors
         user = User(email=form.email.data, password=form.password.data)
         try:
-            queried_user = User.query.filter_by(email=user.email).first()
+            # queried_user = User.query.filter_by(email=user.email).first()
+            queried_user = db.session.execute('SELECT * FROM user WHERE email = "%s"' % user.email).fetchone()
             if queried_user is None:
                 return "No account is registered with this email."
             if queried_user.password != user.password:
                 return "Wrong password."
-            flask_login.login_user(queried_user)
+            flask_login.login_user(
+                user_from_query_result(queried_user))  # conversion is needed for flask_login functions
             redirect_endpoint = "instructor_dashboard" if queried_user.user_type == INSTRUCTOR else "student_dashboard"
             db.session.close()
             return redirect(url_for(redirect_endpoint))
@@ -128,9 +135,12 @@ def instructor_dashboard():
         c = Course(CRN=add_course_form.CRN.data, title=add_course_form.title.data, year=add_course_form.year.data,
                    term=add_course_form.term.data,
                    instructor=flask_login.current_user.email)
-        print(c)
         try:
-            db.session.add(c)
+            db.session.execute(
+                'INSERT INTO course '
+                '(CRN, title, year, term, instructor) '
+                'VALUES ("%s", "%s", "%s", "%s", "%s")' %
+                (c.CRN, c.title, c.year, c.term, c.instructor))
             db.session.commit()
             db.session.close()
         except Exception as e:
