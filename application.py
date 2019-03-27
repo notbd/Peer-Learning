@@ -171,6 +171,23 @@ def student_dashboard():
 
     return render_template("student_dashboard.html", current_user=flask_login.current_user)
 
+@application.route('/update/')
+def update():
+    name = request.args.get('name')
+    return render_template('update.html')
+
+@application.route('/updateaction/', methods=['POST'])
+def updateaction():
+    params = request.args if request.method == 'GET' else request.form
+    newname = params.get('name')
+    try:
+        db.session.execute('UPDATE user SET name = "%s" WHERE email = "%s"' % (newname, flask_login.current_user.email))
+        db.session.commit()
+        db.session.close()
+    except Exception as e:
+        db.session.rollback()
+        return str(e)
+    return redirect(url_for('student_dashboard'))
 
 @login_manager.user_loader
 def user_loader(email):

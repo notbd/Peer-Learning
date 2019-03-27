@@ -1,0 +1,21 @@
+{% extends "base.html" %} {% import 'macros.html' as macros %}
+{% block content %}
+  <head>
+    <meta charset="UTF-8">
+    <title>Update Information</title>
+  </head>
+  <body>
+
+    <div align="center">
+      <h2>Update Information</h2>
+    </div>
+
+    <hr>
+    <div align="center">
+      <form action='/updateaction/' method="post">
+        Enter new name here: <input type="text" name="name" value=""/>
+        <input type="submit" value="update">
+      </form>
+    </div>
+  </body>
+  {% endblock %}
