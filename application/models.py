@@ -35,7 +35,13 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return '<User\tname: %s\temail: %s\tpassword: %s\ttype: %s>' % (
-        self.name, self.email, self.password, self.user_type)
+            self.name, self.email, self.password, self.user_type)
+
+
+def user_from_query_result(query_result):
+    return User(query_result.email, query_result.password, query_result.user_type,
+                query_result.name)
+
 
 class Course(db.Model):
     CRN = db.Column(db.String(120), primary_key=True)
