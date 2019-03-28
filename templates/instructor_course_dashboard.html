@@ -1,0 +1,55 @@
+{% extends "base.html" %} {% import 'macros.html' as macros %}
+{% block content %}
+
+<style>
+#AddCourseForm{
+	display: none;
+    width: 300px;
+    border: 1px solid #ccc;
+    padding: 14px;
+    background: #ececec;
+}
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+
+</style>
+
+<script>
+$(document).ready(function(){
+	$('#AddCourseBtn').click(function(){
+  		$('#AddCourseForm').toggle(500);
+  });
+});
+</script>
+
+<form action="/logout" method="post">
+    <button type="submit" style="float: right;">Log Out</button>
+</form>
+
+<div class="col-md-4 col-md-offset-4">
+
+      <div align="center">
+        <h2>Course Dashboard</h2>
+      </div>
+
+<br>
+    instructor:  {{current_user.name}}
+<br>
+    course: {{course.title}}
+    <form>
+        <button type="submit" formaction="/course/delete/{{course.CRN}}" formmethod="post"> Delete course </button>
+    </form>
+</div>
+
+{% endblock %}

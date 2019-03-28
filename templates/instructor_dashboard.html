@@ -43,7 +43,7 @@ $(document).ready(function(){
         <h2>Instructor Dashboard for {{current_user.name}}</h2>
       </div>
 
-<hr>
+<br>
 
 <h4>Courses</h4>
     <table>
@@ -57,7 +57,7 @@ $(document).ready(function(){
       {% for c in courses %}
         <tr>
           <td>{{ c.CRN }}</td>
-          <td>{{ c.title }}</td>
+            <td><a href="/dashboard/instructor/course/{{c.CRN}}">{{ c.title }}</a></td>
           <td>{{ c.year }}</td>
           <td>{{ c.term }}</td>
         </tr>

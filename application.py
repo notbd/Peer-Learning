@@ -132,9 +132,7 @@ def instructor_dashboard():
         if not add_course_form.validate():
             return str(add_course_form.errors)
 
-        c = Course(CRN=add_course_form.CRN.data, title=add_course_form.title.data, year=add_course_form.year.data,
-                   term=add_course_form.term.data,
-                   instructor=flask_login.current_user.email)
+        c = course_from_form(add_course_form)
         try:
             db.session.execute(
                 'INSERT INTO course '
@@ -161,6 +159,42 @@ def instructor_dashboard():
                            add_course_form=add_course_form)
 
 
+@application.route('/dashboard/instructor/course/<CRN>', methods=['GET'])
+def course_dashboard(CRN):
+    try:
+        fetched_course = db.session.execute(
+            'SELECT * FROM course '
+            'WHERE CRN="%s"' % CRN).fetchone()
+        if fetched_course is None:
+            db.session.close()
+            return redirect("instructor_dashboard")
+        else:
+            course = Course(CRN=fetched_course.CRN, title=fetched_course.title, year=fetched_course.year,
+                            term=fetched_course.term, instructor=fetched_course.instructor)
+            db.session.close()
+            return render_template("instructor_course_dashboard.html", current_user=flask_login.current_user, course=course)
+    except Exception as e:
+        db.session.rollback()
+        # TODO: render form with error msg
+        return str(e)
+
+
+@application.route('/course/delete/<CRN>', methods=['POST'])
+def delete_course(CRN):
+    # TODO: authenticate user permission
+    try:
+        db.session.execute(
+            'DELETE FROM course '
+            'WHERE CRN="%s"' % CRN)
+        db.session.commit()
+        db.session.close()
+    except Exception as e:
+        db.session.rollback()
+        # TODO: render form with error msg
+        return str(e)
+    return redirect(url_for('instructor_dashboard'))
+
+
 @application.route('/dashboard/student', methods=['GET'])
 def student_dashboard():
     if flask_login.current_user is None or flask_login.current_user.is_anonymous:
@@ -171,10 +205,12 @@ def student_dashboard():
 
     return render_template("student_dashboard.html", current_user=flask_login.current_user)
 
+
 @application.route('/update/')
 def update():
     name = request.args.get('name')
     return render_template('update.html')
+
 
 @application.route('/updateaction/', methods=['POST'])
 def updateaction():
@@ -189,9 +225,16 @@ def updateaction():
         return str(e)
     return redirect(url_for('student_dashboard'))
 
+
 @login_manager.user_loader
 def user_loader(email):
     return User.query.get(email)
+
+
+def course_from_form(course_form):
+    return Course(CRN=course_form.CRN.data, title=course_form.title.data, year=course_form.year.data,
+                  term=course_form.term.data,
+                  instructor=flask_login.current_user.email)
 
 
 if __name__ == '__main__':
