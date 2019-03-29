@@ -58,7 +58,7 @@ html {
 	font-family: Microsoft YaHei,sans-serif;
 	z-index: 0;
 	line-height: 1.5;
-	background-image: url(top_img.jpg);
+	// background-image: url(top_img.jpg);
 	background-color: #121925;
 	background-size: cover;
 	background-position: 50% 50%;
