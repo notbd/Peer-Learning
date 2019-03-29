@@ -1,5 +1,7 @@
 # Custom
 .DS_Store
 .vscode
+.pyc
+.idea
 __pycache__
 venv
