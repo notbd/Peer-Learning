@@ -1,7 +1,9 @@
 <html><head>
 <meta charset="UTF-8">
 <title>Welcome to :) app</title>
-<link href="test.css" rel="stylesheet" media="screen" type="text/css">
+
+<link href="{{ url_for('static', filename='test.css')}}" rel="stylesheet" media="screen" type="text/css">
+
 <meta name="description" content="do you want to use it">
 <meta name="keywords" content=" you find it">
 <script async="" src="//www.google-analytics.com/analytics.js"></script><script>
@@ -18,13 +20,13 @@
 <div id="top">
 <div id="top_img">
 <main id="top_main">
-<div id="top_logo"><img src="test.png" ></div>
-<div id="top_title"><img id="top_title01" alt=":)" src="smile.jpg">
+<div id="top_logo"><img src="{{ url_for('static', filename='test.png' ) }}" ></div>
+<div id="top_title"><img id="top_title01" alt=":)" src="{{ url_for('static', filename='smile.jpg' ) }}" >
 <ul id="top_navlist">
-<a class="top_nav" href="signup.html"><li>Sign Up</li></a>
-<a class="top_nav" href="login.html"><li>Log in</li></a>
-<a class="top_nav" href="/wp/comic.html"><li>COMIC</li></a>
-<a class="top_nav" href="/wp/game.html"><li>GAMES</li></a>
+<a class="top_nav" href="signup"><li>Sign Up</li></a>
+<a class="top_nav" href="login"><li>Log in</li></a>
+<a class="top_nav" href="student_dashboard"><li>Dashboard</li></a>
+<a class="top_nav" href="update"><li>Change Information</li></a>
 
 </ul>
 </main>
