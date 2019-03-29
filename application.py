@@ -227,6 +227,8 @@ def course_from_form(course_form):
                   term=course_form.term.data,
                   instructor=flask_login.current_user.email)
 
+def test():
+    return render_template('test.html')
 
 if __name__ == '__main__':
     application.run(host='0.0.0.0')
