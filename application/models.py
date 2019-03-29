@@ -56,3 +56,16 @@ class Course(db.Model):
         self.title = title
         self.term = term
         self.instructor = instructor
+
+
+class Question(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    CRN = db.Column(db.String(120), db.ForeignKey('course.CRN'))
+    date = db.Column(db.Date())
+    question = db.Column(db.String(300))
+
+
+class Response(db.Model):
+    question_id = db.Column(db.Integer, primary_key=True)
+    student = db.Column(db.String(120), db.ForeignKey('user.email'), primary_key=True)
+    response = db.Column(db.String(1000))
