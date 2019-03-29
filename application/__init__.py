@@ -5,4 +5,4 @@ from flask_login import LoginManager
 application = Flask(__name__)
 application.config.from_object('config')
 db = SQLAlchemy(application)
-
+application.static_folder = 'static'
