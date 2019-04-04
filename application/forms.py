@@ -39,3 +39,6 @@ class CourseInfoForm(Form):
     title = StringField(label='Course Title')
     year = IntegerField(label='Year')
     term = StringField(label='Term')
+
+class StudentSearchForm(Form):
+    CRN = IntegerField(label='CRN')

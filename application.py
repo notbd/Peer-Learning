@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from application import db
 from application.models import *
 from application.forms import *
@@ -151,7 +151,7 @@ def instructor_dashboard():
                            add_course_form=add_course_form)
 
 
-@application.route('/dashboard/instructor/course/<CRN>', methods=['GET'])
+@application.route('/dashboard/instructor/course', methods=['GET'])
 def course_dashboard(CRN):
     try:
         fetched_course = db.session.execute(
@@ -187,15 +187,33 @@ def delete_course(CRN):
     return redirect(url_for('instructor_dashboard'))
 
 
-@application.route('/dashboard/student', methods=['GET'])
+@application.route('/dashboard/student', methods=['GET','POST'])
 def student_dashboard():
     if flask_login.current_user is None or flask_login.current_user.is_anonymous:
         return redirect(url_for('login'))
-
     if flask_login.current_user.user_type == INSTRUCTOR:
         return redirect(url_for('instructor_dashboard'))
 
-    return render_template("student_dashboard.html", current_user=flask_login.current_user)
+    form2 = StudentSearchForm(request.form)
+    if request.method == 'POST' and form2.validate():
+        try:
+            CRN = int(form2.CRN.data)
+            fetched_course = db.session.execute(
+                'SELECT * FROM course '
+                'WHERE CRN="%s"' % CRN).fetchone()
+            if fetched_course is None:
+                db.session.close()
+                # output error message
+                return redirect(url_for('student_search_dashboard'))
+            else:
+                course = Course(CRN=fetched_course.CRN, title=fetched_course.title, year=fetched_course.year,
+                                term=fetched_course.term, instructor=fetched_course.instructor)
+                db.session.close()
+                return render_template("student_search_dashboard.html", current_user=flask_login.current_user, course=course)
+        except Exception as e:
+            db.session.rollback()
+            return str(e)
+    return render_template('student_dashboard.html', current_user=flask_login.current_user, form2 = form2)
 
 
 @application.route('/update/')

@@ -66,7 +66,7 @@ $(document).ready(function(){
     </table>
 <br>
 <button id="AddCourseBtn" class="btn btn-primary">Add Course</button>
-<form id="AddCourseForm" action="/dashboard/instructor/courses" method="post">
+<form id="AddCourseForm" action="/dashboard/instructor/course" method="post">
     {{ add_course_form.hidden_tag() }}
     {{ macros.render_field(add_course_form.CRN, placeholder='24521', label_visible=true) }}
     {{ macros.render_field(add_course_form.title, placeholder='CS 411', label_visible=true) }}

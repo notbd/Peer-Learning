@@ -1,0 +1,42 @@
+{% extends "base.html" %} {% import 'macros.html' as macros %}
+{% block content %}
+
+<style>
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+
+</style>
+
+<form action="/logout" method="post">
+    <button type="submit" style="float: right;">Log Out</button>
+</form>
+
+<div class="col-md-4 col-md-offset-4">
+
+      <div align="center">
+        <h2>Search Result</h2>
+      </div>
+
+<hr>
+
+<ul>
+    <li>Course: {{course.title}}</li>
+    <li>Instructor: {{course.instructor}}</li>
+    <li>Year: {{course.year}}</li>
+    <li>Term: {{course.term}}</li>
+</ul>
+<button type="submit" style="float: right;">Register (under construction)</button>
+</div>
+
+{% endblock %}

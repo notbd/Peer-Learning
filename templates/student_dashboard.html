@@ -12,8 +12,21 @@
       </div>
 
 <hr>
+
 <form action="/update" method="get">
-    <button type="submit" style="float: right;">Change personal information</button>
+    <button type="submit" class="btn btn-primary">Change personal information</button></p></div>
+</form>
+
+<hr>
+
+<form method="post" action="/dashboard/student" id="db_post" name="db_view">
+
+    {{ form2.hidden_tag() }}
+
+    {{ macros.render_field(form2.CRN, placeholder='Enter the CRN of course to register', label_visible=false) }}
+
+    <div align="center"><button type="submit" class="btn btn-primary">Search</button></p></div>
+
 </form>
 
 </div>
