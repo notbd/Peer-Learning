@@ -204,7 +204,8 @@ def student_dashboard():
             if fetched_course is None:
                 db.session.close()
                 # output error message
-                return redirect(url_for('student_search_dashboard'))
+                return "The CRN you entered does not exist. Please go back to previous page and re-enter the CRN."
+                # return redirect(url_for('student_search_dashboard'))
             else:
                 course = Course(CRN=fetched_course.CRN, title=fetched_course.title, year=fetched_course.year,
                                 term=fetched_course.term, instructor=fetched_course.instructor)
