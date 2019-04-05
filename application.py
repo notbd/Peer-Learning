@@ -213,7 +213,7 @@ def find_registered_courses():
                 'WHERE t.student="%s" AND c.CRN=t.CRN AND c.instructor=i.email' % flask_login.current_user.email).fetchall()
             if fetched_courses is None:
                 db.session.close()
-                return redirect("instructor_dashboard")
+                return redirect("student_dashboard")
             else:
                 courses = []
                 for fetched_course in fetched_courses:
