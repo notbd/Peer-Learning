@@ -57,6 +57,10 @@ class Course(db.Model):
         self.term = term
         self.instructor = instructor
 
+class Take(db.Model):
+    CRN = db.Column(db.String(120), db.ForeignKey('course.CRN'), primary_key=True)
+    student = db.Column(db.String(120), db.ForeignKey('user.email'), primary_key=True)
+
 
 class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)

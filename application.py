@@ -186,6 +186,46 @@ def delete_course(CRN):
         return str(e)
     return redirect(url_for('instructor_dashboard'))
 
+@application.route('/dashboard/student/<CRN>', methods=['POST'])
+def register_course(CRN):
+    try:
+        db.session.execute(
+            'INSERT INTO Take '
+            '(CRN, Student) '
+            'VALUES ("%s", "%s")' %
+            (CRN, flask_login.current_user.email))
+        db.session.commit()
+        db.session.close()
+    except Exception as e:
+        db.session.rollback()
+        return str(e)
+    return redirect(url_for('student_dashboard'))
+
+@application.route('/dashboard/student/courses', methods=['GET'])
+def find_registered_courses():
+    if request.method == 'GET':
+        try:
+            # fetched_course = db.session.execute(
+            #     'SELECT c.CRN, c.title, c.year, c.term, i.name FROM course AS c, Take AS t, user as i '
+            #     'WHERE t.student="bow2@illinois.edu" AND c.CRN=t.CRN AND c.instructor=i.email').fetchall()
+            fetched_courses = db.session.execute(
+                'SELECT c.CRN, c.title, c.year, c.term, i.name FROM course AS c, Take AS t, user as i '
+                'WHERE t.student="%s" AND c.CRN=t.CRN AND c.instructor=i.email' % flask_login.current_user.email).fetchall()
+            if fetched_courses is None:
+                db.session.close()
+                return redirect("instructor_dashboard")
+            else:
+                courses = []
+                for fetched_course in fetched_courses:
+                    curr_course = Course(CRN=fetched_course.CRN, title=fetched_course.title, year=fetched_course.year,
+                                    term=fetched_course.term, instructor=fetched_course.name)
+                    courses.append(curr_course)
+                db.session.close()
+            return render_template("student_registered_courses.html", current_user=flask_login.current_user, courses=courses)
+        except Exception as e:
+            db.session.rollback()
+            return str(e)
+    return render_template('student_dashboard.html', current_user=flask_login.current_user)
 
 @application.route('/dashboard/student', methods=['GET','POST'])
 def student_dashboard():
@@ -204,7 +244,7 @@ def student_dashboard():
             if fetched_course is None:
                 db.session.close()
                 # output error message
-                return "The CRN you entered does not exist. Please go back to previous page and re-enter the CRN."
+                return "<h1>The CRN you entered does not exist. Please go back to previous page and re-enter the CRN.</h1>"
                 # return redirect(url_for('student_search_dashboard'))
             else:
                 course = Course(CRN=fetched_course.CRN, title=fetched_course.title, year=fetched_course.year,

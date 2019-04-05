@@ -37,6 +37,9 @@ td, th {
     <li>Term: {{course.term}}</li>
 </ul>
 <button type="submit" style="float: right;">Register (under construction)</button>
+<form>
+    <button type="submit" formaction="/dashboard/student/{{course.CRN}}" formmethod="post"> Register </button>
+</form>
 </div>
 
 {% endblock %}
