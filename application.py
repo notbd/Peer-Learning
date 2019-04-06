@@ -151,7 +151,7 @@ def instructor_dashboard():
                            add_course_form=add_course_form)
 
 
-@application.route('/dashboard/instructor/course', methods=['GET'])
+@application.route('/dashboard/instructor/course/<CRN>', methods=['GET'])
 def course_dashboard(CRN):
     try:
         fetched_course = db.session.execute(
@@ -193,6 +193,24 @@ def register_course(CRN):
             'INSERT INTO Take '
             '(CRN, Student) '
             'VALUES ("%s", "%s")' %
+            (CRN, flask_login.current_user.email))
+        db.session.commit()
+        db.session.close()
+    except Exception as e:
+        db.session.rollback()
+        return str(e)
+    return redirect(url_for('student_dashboard'))
+
+@application.route('/dashboard/student/delete/<CRN>', methods=['POST'])
+def student_drop_course(CRN):
+    if flask_login.current_user is None or flask_login.current_user.is_anonymous:
+        return redirect(url_for('login'))
+    if flask_login.current_user.user_type == INSTRUCTOR:
+        return redirect(url_for('instructor_dashboard'))
+    try:
+        db.session.execute(
+            'DELETE FROM Take '
+            'WHERE CRN="%s" AND student="%s"' %
             (CRN, flask_login.current_user.email))
         db.session.commit()
         db.session.close()
@@ -245,12 +263,25 @@ def student_dashboard():
                 db.session.close()
                 # output error message
                 return "<h1>The CRN you entered does not exist. Please go back to previous page and re-enter the CRN.</h1>"
-                # return redirect(url_for('student_search_dashboard'))
             else:
                 course = Course(CRN=fetched_course.CRN, title=fetched_course.title, year=fetched_course.year,
                                 term=fetched_course.term, instructor=fetched_course.instructor)
                 db.session.close()
-                return render_template("student_search_dashboard.html", current_user=flask_login.current_user, course=course)
+                registered_flag = False
+                # registered_flag: True if a student has already registered certain course
+                try:
+                    possible_redundancy = db.session.execute(
+                        'SELECT * '
+                        'FROM Take '
+                        'WHERE student="%s" AND CRN = "%s"' %
+                        (flask_login.current_user.email, CRN)).fetchone()
+                    db.session.close()
+                    if possible_redundancy is not None:
+                        registered_flag = True
+                except Exception as e:
+                    db.session.rollback()
+                    return str(e)
+                return render_template("student_search_dashboard.html", current_user=flask_login.current_user, course=course,registered_flag = registered_flag)
         except Exception as e:
             db.session.rollback()
             return str(e)

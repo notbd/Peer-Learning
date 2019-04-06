@@ -35,11 +35,23 @@ td, th {
     <li>Instructor: {{course.instructor}}</li>
     <li>Year: {{course.year}}</li>
     <li>Term: {{course.term}}</li>
+    {% if registered_flag %}
+        <li>Status: Registered</li>
+    {% else %}
+        <li>Status: Not registered</li>
+    {% endif %}
 </ul>
-<button type="submit" style="float: right;">Register (under construction)</button>
-<form>
-    <button type="submit" formaction="/dashboard/student/{{course.CRN}}" formmethod="post"> Register </button>
-</form>
+
+{% if registered_flag %}
+    <form>
+        <button type="submit" formaction="/dashboard/student/delete/{{course.CRN}}" formmethod="post"> Delete/drop </button>
+    </form>
+{% else %}
+    <form>
+        <button type="submit" formaction="/dashboard/student/{{course.CRN}}" formmethod="post"> Register </button>
+    </form>
+{% endif %}
+
 </div>
 
 {% endblock %}
