@@ -318,6 +318,42 @@ def course_from_form(course_form):
                   term=course_form.term.data,
                   instructor=flask_login.current_user.email)
 
+
+import subprocess
+@application.route("/query-parser-test", methods=['GET', 'POST'])
+def test_run_executable():
+    if request.method == 'GET':
+        return """
+        <form action="/query-parser-test" method="post">
+            Table 1 Name: <br>
+            <input type="text" name="table1name" value="foo"> <br>
+            Table 1 Columns: <br>
+            <input type="text" name="table1columns" value="a,b,c"> <br>
+            
+            Table 2 Name: <br>
+            <input type="text" name="table2name" value="bar"> <br>
+            Table 2 Columns: <br>
+            <input type="text" name="table2columns" value="d,e,f"> <br>
+            
+            Enter SQL query:<br>
+            <input type="text" name="query" style="width:1000;" value="SELECT AVG(a) FROM foo JOIN bar ON bar.d = foo.a GROUP BY bar.f"> <br>
+            <br><br>
+            <input type="submit" value="Submit">
+        </form> 
+        """
+    else:
+        try:
+            table1 = request.form['table1name'] + "," + request.form['table1columns']
+            table2 = request.form['table2name'] + "," + request.form['table2columns']
+            sql_query = request.form['query']
+
+            p = subprocess.Popen(["static/main", sql_query, table1, table2], stdout=subprocess.PIPE)
+            stdout, _ = p.communicate()
+            return '<body style="white-space:pre-wrap;" >' + sql_query + '\n\n\n' + str(stdout) + '</body>'
+        except Exception as e:
+            return str(e)
+
+
 def test():
     return render_template('test.html')
 
