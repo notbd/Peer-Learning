@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from application import db
 from application.models import *
 from application.forms import *
 import flask_login
+import query_parser
 
 # Elastic Beanstalk initalization
 application = Flask(__name__)
@@ -164,7 +165,8 @@ def course_dashboard(CRN):
             course = Course(CRN=fetched_course.CRN, title=fetched_course.title, year=fetched_course.year,
                             term=fetched_course.term, instructor=fetched_course.instructor)
             db.session.close()
-            return render_template("instructor_course_dashboard.html", current_user=flask_login.current_user, course=course)
+            return render_template("instructor_course_dashboard.html", current_user=flask_login.current_user,
+                                   course=course)
     except Exception as e:
         db.session.rollback()
         # TODO: render form with error msg
@@ -186,6 +188,7 @@ def delete_course(CRN):
         return str(e)
     return redirect(url_for('instructor_dashboard'))
 
+
 @application.route('/dashboard/student/<CRN>', methods=['POST'])
 def register_course(CRN):
     try:
@@ -200,6 +203,7 @@ def register_course(CRN):
         db.session.rollback()
         return str(e)
     return redirect(url_for('student_dashboard'))
+
 
 @application.route('/dashboard/student/delete/<CRN>', methods=['POST'])
 def student_drop_course(CRN):
@@ -219,6 +223,7 @@ def student_drop_course(CRN):
         return str(e)
     return redirect(url_for('student_dashboard'))
 
+
 @application.route('/dashboard/student/courses', methods=['GET'])
 def find_registered_courses():
     if request.method == 'GET':
@@ -236,16 +241,18 @@ def find_registered_courses():
                 courses = []
                 for fetched_course in fetched_courses:
                     curr_course = Course(CRN=fetched_course.CRN, title=fetched_course.title, year=fetched_course.year,
-                                    term=fetched_course.term, instructor=fetched_course.name)
+                                         term=fetched_course.term, instructor=fetched_course.name)
                     courses.append(curr_course)
                 db.session.close()
-            return render_template("student_registered_courses.html", current_user=flask_login.current_user, courses=courses)
+            return render_template("student_registered_courses.html", current_user=flask_login.current_user,
+                                   courses=courses)
         except Exception as e:
             db.session.rollback()
             return str(e)
     return render_template('student_dashboard.html', current_user=flask_login.current_user)
 
-@application.route('/dashboard/student', methods=['GET','POST'])
+
+@application.route('/dashboard/student', methods=['GET', 'POST'])
 def student_dashboard():
     if flask_login.current_user is None or flask_login.current_user.is_anonymous:
         return redirect(url_for('login'))
@@ -281,11 +288,12 @@ def student_dashboard():
                 except Exception as e:
                     db.session.rollback()
                     return str(e)
-                return render_template("student_search_dashboard.html", current_user=flask_login.current_user, course=course,registered_flag = registered_flag)
+                return render_template("student_search_dashboard.html", current_user=flask_login.current_user,
+                                       course=course, registered_flag=registered_flag)
         except Exception as e:
             db.session.rollback()
             return str(e)
-    return render_template('student_dashboard.html', current_user=flask_login.current_user, form2 = form2)
+    return render_template('student_dashboard.html', current_user=flask_login.current_user, form2=form2)
 
 
 @application.route('/update/')
@@ -319,7 +327,6 @@ def course_from_form(course_form):
                   instructor=flask_login.current_user.email)
 
 
-import subprocess
 @application.route("/query-parser-test", methods=['GET', 'POST'])
 def test_run_executable():
     if request.method == 'GET':
@@ -335,8 +342,8 @@ def test_run_executable():
             Table 2 Columns: <br>
             <input type="text" name="table2columns" value="d,e,f"> <br>
             
-            Enter SQL query:<br>
-            <input type="text" name="query" style="width:1000;" value="SELECT AVG(a) FROM foo JOIN bar ON bar.d = foo.a GROUP BY bar.f"> <br>
+            Enter SQL query: (one query on each line)<br>
+            <textarea type="text" name="query" rows="10" cols="300">SELECT AVG(a) FROM foo JOIN bar ON bar.d = foo.a GROUP BY bar.f </textarea> <br>
             <br><br>
             <input type="submit" value="Submit">
         </form> 
@@ -345,17 +352,22 @@ def test_run_executable():
         try:
             table1 = request.form['table1name'] + "," + request.form['table1columns']
             table2 = request.form['table2name'] + "," + request.form['table2columns']
-            sql_query = request.form['query']
-
-            p = subprocess.Popen(["static/main", sql_query, table1, table2], stdout=subprocess.PIPE)
-            stdout, _ = p.communicate()
-            return '<body style="white-space:pre-wrap;" >' + sql_query + '\n\n\n' + str(stdout) + '</body>'
+            sql_queries = request.form['query'].split('\n')
+            return jsonify(
+                query_parser.concise_report(
+                    *query_parser.parse_multiple_query(sql_queries, [table1, table2])
+                )
+            )
+            # p = subprocess.Popen(["static/main", sql_query, table1, table2], stdout=subprocess.PIPE)
+            # stdout, _ = p.communicate()
+            # return '<body style="white-space:pre-wrap;" >' + sql_query + '\n\n\n' + str(stdout) + '</body>'
         except Exception as e:
             return str(e)
 
 
 def test():
     return render_template('test.html')
+
 
 if __name__ == '__main__':
     application.run(host='0.0.0.0')
