@@ -353,14 +353,15 @@ def test_run_executable():
             table1 = request.form['table1name'] + "," + request.form['table1columns']
             table2 = request.form['table2name'] + "," + request.form['table2columns']
             sql_queries = request.form['query'].split('\n')
-            return jsonify(
-                query_parser.concise_report(
+            analysis =  query_parser.concise_report(
                     *query_parser.parse_multiple_query(sql_queries, [table1, table2])
                 )
-            )
-            # p = subprocess.Popen(["static/main", sql_query, table1, table2], stdout=subprocess.PIPE)
-            # stdout, _ = p.communicate()
-            # return '<body style="white-space:pre-wrap;" >' + sql_query + '\n\n\n' + str(stdout) + '</body>'
+            return render_template("query_analysis.html", analysis=analysis)
+            # return jsonify(
+            #     query_parser.concise_report(
+            #         *query_parser.parse_multiple_query(sql_queries, [table1, table2])
+            #     )
+            # )
         except Exception as e:
             return str(e)
 

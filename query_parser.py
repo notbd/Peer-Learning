@@ -33,4 +33,5 @@ def parse_multiple_query(queries, tables):
 
 
 def concise_report(column_access_freq, join_freq, table_acess_freq):
-    return {"column_access_freq": column_access_freq, "join_freq": join_freq, "table_acess_freq": table_acess_freq}
+    return {"column_access_freq": column_access_freq, "join_freq": join_freq, "table_access_freq": table_acess_freq}
+

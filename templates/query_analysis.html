@@ -1,0 +1,102 @@
+{% extends "base.html" %} {% import 'macros.html' as macros %}
+{% block content %}
+
+<style>
+body {
+  background-color:#252627;
+}
+
+table {
+  font-family: monospace;
+  border-collapse: collapse;
+  width: 100%;
+  background-color: #c6cbcb;
+}
+
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+th {
+  background-color: #8cbdb4;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+h4 {
+ font-family: monospace;
+ text-align: center;
+}
+
+.block {
+  border-radius: 20px;
+  background-color: #c1ddde;
+  width:500;
+  margin:auto;
+  padding:10px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+</style>
+
+
+
+
+{% for clause, column_freq in analysis["column_access_freq"].items() %}
+<div class="block">
+<h4> Most commonly accessed columns for {{clause}} </h4>
+<table>
+      <tr>
+          <th>column</th>
+          <th>frequency</th>
+      </tr>
+    {% for col, cnt in column_freq.most_common(5) %}
+      <tr>
+          <td>{{col}}</td>
+          <td>{{cnt}}</td>
+      </tr>
+    {% endfor %}
+</table>
+</div>
+{% endfor %}
+
+<div class="block">
+<h4 > Most commonly used joins </h4>
+<table>
+      <tr>
+          <th>join</th>
+          <th>frequency</th>
+      </tr>
+    {% for j, cnt in analysis["join_freq"].most_common(5) %}
+      <tr>
+          <td>{{j}}</td>
+          <td>{{cnt}}</td>
+      </tr>
+    {% endfor %}
+</table>
+</div>
+
+<div class="block">
+<h4 > Most commonly accessed tables </h4>
+<table>
+      <tr>
+          <th>table</th>
+          <th>frequency</th>
+      </tr>
+    {% for t, cnt in analysis["table_access_freq"].most_common(5) %}
+      <tr>
+          <td>{{t}}</td>
+          <td>{{cnt}}</td>
+      </tr>
+    {% endfor %}
+</table>
+
+</div>
+
+{% endblock %}
