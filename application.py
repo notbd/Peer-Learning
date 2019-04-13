@@ -4,6 +4,7 @@ from application.models import *
 from application.forms import *
 import flask_login
 import query_parser
+import datetime
 
 # Elastic Beanstalk initalization
 application = Flask(__name__)
@@ -188,6 +189,50 @@ def delete_course(CRN):
         return str(e)
     return redirect(url_for('instructor_dashboard'))
 
+@application.route('/dashboard/instructor/course/question/<CRN>', methods=['GET','POST'])
+def check_question(CRN):
+    if flask_login.current_user is None or flask_login.current_user.is_anonymous:
+        return redirect(url_for('login'))
+
+    if flask_login.current_user.user_type == STUDENT:
+        return redirect(url_for('student_dashboard'))
+
+    add_question_form = AddQuestionForm(request.form)
+    if request.method == 'GET':
+        try:
+            # questions = db.session.execute('SELECT * FROM Question WHERE Question.CRN=:crn',{'crn':CRN}).fetchall()
+            query_results = []
+            questions = db.session.execute('SELECT * FROM Question WHERE CRN="%s"' % (CRN)).fetchall()
+            if questions is not None:
+                for q in questions:
+                    query_results.append([q.id,q.date,q.question])
+            db.session.close()
+            return render_template("add_question.html", current_user=flask_login.current_user,
+                                                query_results=query_results, CRN=CRN, add_question_form=add_question_form)
+        except Exception as e:
+            db.session.rollback()
+            return str(e)
+    elif request.method == 'POST':
+        if not add_question_form.validate():
+            return str(add_question_form.errors)
+        question = add_question_form.question.data
+        date = add_question_form.question_date.data
+        try:
+            datetime.datetime.strptime(date, '%m/%d/%Y')
+        except ValueError:
+            return ('<h1>Incorrect data format, should be MM/DD/YYYY</h1>')
+
+        date_object = datetime.datetime.strptime(date, '%m/%d/%Y')
+        try:
+            db.session.execute('INSERT INTO Question (crn,date,question) VALUES (:crn,:qdate,:question)', {'crn':CRN, 'qdate':date_object,'question':question})
+            db.session.commit()
+            db.session.close()
+        except Exception as e:
+            db.session.rollback()
+            # TODO: render form with error msg
+            return str(e)
+        return redirect(url_for('instructor_dashboard'))
+    return render_template("add_question.html", current_user=flask_login.current_user,CRN=CRN, add_question_form=add_question_form)
 
 @application.route('/dashboard/student/<CRN>', methods=['POST'])
 def register_course(CRN):
@@ -336,17 +381,17 @@ def test_run_executable():
             <input type="text" name="table1name" value="foo"> <br>
             Table 1 Columns: <br>
             <input type="text" name="table1columns" value="a,b,c"> <br>
-            
+
             Table 2 Name: <br>
             <input type="text" name="table2name" value="bar"> <br>
             Table 2 Columns: <br>
             <input type="text" name="table2columns" value="d,e,f"> <br>
-            
+
             Enter SQL query: (one query on each line)<br>
             <textarea type="text" name="query" rows="10" cols="300">SELECT AVG(a) FROM foo JOIN bar ON bar.d = foo.a GROUP BY bar.f </textarea> <br>
             <br><br>
             <input type="submit" value="Submit">
-        </form> 
+        </form>
         """
     else:
         try:

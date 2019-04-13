@@ -42,3 +42,7 @@ class CourseInfoForm(Form):
 
 class StudentSearchForm(Form):
     CRN = IntegerField(label='CRN')
+
+class AddQuestionForm(Form):
+    question_date = StringField(label='Date')
+    question = StringField(label='Question Content')

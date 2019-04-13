@@ -50,6 +50,9 @@ $(document).ready(function(){
     <form>
         <button type="submit" formaction="/course/delete/{{course.CRN}}" formmethod="post"> Delete course </button>
     </form>
+		<form>
+        <button type="submit" formaction="/dashboard/instructor/course/question/{{course.CRN}}" formmethod="get"> Questions </button>
+    </form>
 </div>
 
 {% endblock %}
