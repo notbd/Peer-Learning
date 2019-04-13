@@ -222,6 +222,8 @@ def check_question(CRN):
         except ValueError:
             return ('<h1>Incorrect data format, should be MM/DD/YYYY</h1>')
 
+        if len(question) < 1:
+            return ('<h1>Failed. The question content is empty.</h1>')
         date_object = datetime.datetime.strptime(date, '%m/%d/%Y')
         try:
             db.session.execute('INSERT INTO Question (crn,date,question) VALUES (:crn,:qdate,:question)', {'crn':CRN, 'qdate':date_object,'question':question})

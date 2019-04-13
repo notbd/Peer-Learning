@@ -2,21 +2,34 @@
 {% block content %}
 
 <style>
+  #AddQuestionForm{
+  	display: none;
+      width: 300px;
+      border: 1px solid #ccc;
+      padding: 14px;
+      background: #ececec;
+  }
 
-table {
-  font-family: arial, sans-serif;
-  border-collapse: collapse;
-  width: 100%;
-}
+  table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
 
-td, th {
-  border: 1px solid #dddddd;
-  text-align: left;
-  padding: 8px;
-}
-
-
+  td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+  }
 </style>
+
+<script>
+$(document).ready(function(){
+	$('#AddQuestionButton').click(function(){
+  		$('#AddQuestionForm').toggle(500);
+  });
+});
+</script>
 
 <form action="/logout" method="post">
     <button type="submit" style="float: right;">Log Out</button>
@@ -49,7 +62,7 @@ td, th {
       </tbody>
       </table>
   <br>
-
+<button id="AddQuestionButton" class="btn btn-primary">Add Question</button>
   <form id="AddQuestionForm" action="/dashboard/instructor/course/question/{{CRN}}" method="post">
       {{ add_question_form.hidden_tag() }}
       {{ macros.render_field(add_question_form.question_date, placeholder='MM/DD/YYYY', label_visible=true) }}
