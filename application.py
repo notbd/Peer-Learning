@@ -202,7 +202,7 @@ def instructor_question(qid=None):
             ).fetchall()
             db.session.close()
             q = Question(qid, question, schemas, crn)
-            is_active = qid == active_question
+            is_active = str(qid) == str(active_question)
             return render_template("instructor_question_dashboard.html", q=q, is_active=is_active, responses=responses)
         except Exception as e:
             return str(e)
