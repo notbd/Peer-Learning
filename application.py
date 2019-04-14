@@ -87,7 +87,7 @@ def logout():
     flask_login.logout_user()
     return redirect(url_for("login"))
 
-
+# page where instructor can view the list of courses and add new course
 @application.route('/dashboard/instructor/courses', methods=['GET', 'POST'])
 def instructor_dashboard():
     if flask_login.current_user is None or flask_login.current_user.is_anonymous:
@@ -128,9 +128,9 @@ def instructor_dashboard():
     return render_template("instructor_dashboard.html", current_user=flask_login.current_user,
                            add_course_form=add_course_form)
 
-
+# page where instructor can view the list of sessions in a course and add new questions
 @application.route('/dashboard/instructor/course/<CRN>', methods=['GET'])
-def course_dashboard(CRN):
+def instructor_course_dashboard(CRN):
     try:
         course_CRN, course_title = db.session.execute(
             'SELECT CRN, title FROM course '
@@ -163,6 +163,7 @@ def delete_course(CRN):
     return redirect(url_for('instructor_dashboard'))
 
 
+# backend-only function for an instructor to set a question as the "active" question of a course
 @application.route('/set-active-question', methods=['POST'])
 def set_active_question():
     print(request.form)
@@ -181,12 +182,48 @@ def set_active_question():
         return "data: " + str(request.form['qid']) + " " + str(e)
 
 
-# @application.route('/dashboard/instructor/course/session/<date>', methods=['GET', 'POST'])
-# def
+# page where instructor can manage a specific question (and view its responses)
+@application.route('/dashboard/instructor/question/', methods=['POST'])
+@application.route('/dashboard/instructor/question/<qid>', methods=['GET'])
+def instructor_question(qid=None):
+    if request.method == 'GET':
+        try:
+            q = db.session.execute(
+                'SELECT id, question, schemas, crn FROM Question WHERE id=%s' % (qid)).fetchone()
+            qid, question, schemas, crn = q
+            active_question = db.session.execute(
+                'SELECT active_question FROM course '
+                'WHERE CRN="%s"' % crn).fetchone()[0]
+            db.session.close()
+            q = Question(qid, question, schemas, crn)
+            is_active = qid==active_question
+            print(qid, active_question, is_active)
+            return render_template("instructor_question_dashboard.html", q=q, is_active=is_active)
+        except Exception as e:
+            return str(e)
+    else:
+        add_question_form = AddQuestionForm(request.form)
+        if not add_question_form.validate():
+            return str(add_question_form.errors)
+        crn = add_question_form.CRN.data
+        schemas = add_question_form.schemas.data
+        question = add_question_form.question.data
+        date = add_question_form.question_date.data
+        try:
+            db.session.execute('INSERT INTO Question (crn,date,schemas,question) '
+                               'VALUES (:crn,:qdate,:schemas, :question)',
+                               {'crn': crn, 'qdate': date, 'schemas':schemas, 'question': question})
+            db.session.commit()
+            db.session.close()
+        except Exception as e:
+            db.session.rollback()
+            # TODO: render form with error msg
+            return str(e)
+        return redirect(url_for('instructor_session', CRN=crn, date=date))
 
-
-@application.route('/dashboard/instructor/course/question/<CRN>', methods=['GET', 'POST'])
-def check_question(CRN):
+# page where instructor can manage the questions for a single session
+@application.route('/dashboard/instructor/session/<CRN>/<date>', methods=['GET', 'POST'])
+def instructor_session(CRN, date):
     if flask_login.current_user is None or flask_login.current_user.is_anonymous:
         return redirect(url_for('login'))
 
@@ -196,48 +233,19 @@ def check_question(CRN):
     add_question_form = AddQuestionForm(request.form)
     if request.method == 'GET':
         try:
-            # questions = db.session.execute('SELECT * FROM Question WHERE Question.CRN=:crn',{'crn':CRN}).fetchall()
-            query_results = []
-            questions = db.session.execute('SELECT * FROM Question WHERE CRN="%s"' % (CRN)).fetchall()
-            active_question = db.session.execute(
-                'SELECT active_question FROM course '
-                'WHERE CRN="%s"' % CRN).fetchone()[0]
-            if questions is not None:
-                for q in questions:
-                    query_results.append([q.id, q.date, q.question])
+            fetched_questions = db.session.execute('SELECT id, question, schemas FROM Question WHERE CRN="%s" '
+                                                   'AND date = "%s"' % (CRN, date)).fetchall()
+            print(fetched_questions)
+            questions = []
+            for id, question, schemas in fetched_questions:
+                questions.append(Question(id, question, schemas))
             db.session.close()
-            return render_template("add_question.html", current_user=flask_login.current_user,
-                                   query_results=query_results, CRN=CRN, add_question_form=add_question_form,
-                                   active_question=active_question)
+            return render_template("instructor_session_dashboard.html", questions=questions,
+                                   add_question_form=add_question_form, date=date, CRN=CRN)
         except Exception as e:
-            db.session.rollback()
             return str(e)
-    elif request.method == 'POST':
-        if not add_question_form.validate():
-            return str(add_question_form.errors)
-        question = add_question_form.question.data
-        date = add_question_form.question_date.data
-        try:
-            datetime.datetime.strptime(date, '%m/%d/%Y')
-        except ValueError:
-            return ('<h1>Incorrect data format, should be MM/DD/YYYY</h1>')
-
-        if len(question) < 1:
-            return ('<h1>Failed. The question content is empty.</h1>')
-        date_object = datetime.datetime.strptime(date, '%m/%d/%Y')
-        try:
-            db.session.execute('INSERT INTO Question (crn,date,question) VALUES (:crn,:qdate,:question)',
-                               {'crn': CRN, 'qdate': date_object, 'question': question})
-            db.session.commit()
-            db.session.close()
-        except Exception as e:
-            db.session.rollback()
-            # TODO: render form with error msg
-            return str(e)
-        return redirect(url_for('check_question', CRN=CRN))
-        # return render_template("add_question.html", current_user=flask_login.current_user, CRN=CRN,
-        #                        add_question_form=add_question_form)
-
+    else:
+        return "Not yet implemented"
 
 @application.route('/dashboard/student/<CRN>', methods=['POST'])
 def register_course(CRN):
@@ -460,10 +468,10 @@ def any_query():
         """
     else:
         try:
-            db.session.execute(request.form['query'])
+            results = db.session.execute(request.form['query']).fetchall()
             db.session.commit()
             db.session.close()
-            return "success"
+            return "success: " + str(results)
         except Exception as e:
             return str(e)
 

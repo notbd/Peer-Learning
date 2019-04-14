@@ -73,6 +73,13 @@ class Question(db.Model):
     question = db.Column(db.String(300))
     schemas = db.Column(db.String(1000), nullable=True)
 
+    def __init__(self, id, question, schemas, CRN=None):
+        self.id = id
+        self.question = question
+        self.schemas = schemas
+        self.CRN = CRN
+
+
 
 class Response(db.Model):
     question_id = db.Column(db.Integer, primary_key=True)

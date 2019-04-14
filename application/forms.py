@@ -1,5 +1,5 @@
 from flask_wtf import Form
-from wtforms import StringField, RadioField, PasswordField, IntegerField, validators
+from wtforms import StringField, RadioField, PasswordField, IntegerField, validators, HiddenField
 from wtforms.fields.html5 import EmailField
 
 INSTRUCTOR = 'instructor'
@@ -44,5 +44,7 @@ class StudentSearchForm(Form):
     CRN = IntegerField(label='CRN')
 
 class AddQuestionForm(Form):
+    CRN = StringField()
     question_date = StringField(label='Date')
+    schemas = StringField()
     question = StringField(label='Question Content')
