@@ -1,45 +1,27 @@
 {% extends "base.html" %} {% import 'macros.html' as macros %}
 {% block content %}
 
-<!-- <div class="col-md-4 col-md-offset-4">
+<main role="main" class="inner cover">
 
-      <div align="center">
-        <h2>Sign Up Page</h2>
-      </div>
+  <h1 class="cover-heading">Sign Up</h1>
+  <hr>
 
-<hr>
-
-<form method="post" action="/signup"  id="db_post" name="db_post">
+  <form method="post" action="/signup" id="db_post" name="db_post">
 
     {{ form.hidden_tag() }}
 
     {{ macros.render_radio_field(form.user_type) }}
-    {{ macros.render_field(form.name, placeholder='Name', type='name', label_visible=true) }}
-    {{ macros.render_field(form.email, placeholder='abc@illinois.edu', type='email', label_visible=true) }}
-    {{ macros.render_field(form.password, type='password', label_visible=true) }}
 
-    <div align="center"><button type="submit" class="btn btn-primary">Sign Up</button></p></div>
+    {{ macros.render_field(form.name, placeholder='Please enter your full name', type='name', label_visible=true) }}
 
-</form>
+    {{ macros.render_field(form.email, placeholder='example@illinois.edu', type='email', label_visible=true, small_text='This will become your future login credential.') }}
 
-</div> -->
+    {{ macros.render_field(form.password, placeholder='Your password here', type='password', label_visible=true, small_text='Think twice - you cannot recover your password.') }}
 
-<main role="main" class="inner cover">
-    <h1 class="cover-heading">Sign Up</h1>
-    <hr>
-    
-    <form method="post" action="/signup"  id="db_post" name="db_post">
-        {{ form.hidden_tag() }}
-        {{ macros.render_radio_field(form.user_type) }}
-        {{ macros.render_field(form.name, placeholder='Please enter your full name', type='name', label_visible=true) }}
+    <button type="submit" class="btn btn-primary">Sign Up</button>
 
-        {{ macros.render_field(form.email, placeholder='example@illinois.edu', type='email', label_visible=true, small_text='This will become your future login credential.') }}
+  </form>
 
-        {{ macros.render_field(form.password, placeholder='Your password here', type='password', label_visible=true, small_text='Think twice - you cannot recover your password.') }}
-
-      <button type="submit" class="btn btn-primary">Sign Up</button>
-    </form>
-
-  </main>
+</main>
 
 {% endblock %}

@@ -25,12 +25,12 @@ class SignUpForm(Form):
     user_type = RadioField(label="User Type", choices=[(STUDENT, STUDENT), (INSTRUCTOR, INSTRUCTOR)])
     name = StringField(label='Name', description="name", validators=[validators.Length(min=1, max=80,
                                                                                        message=u'Name needs to be 1-80 character(s) long')])
-    email = EmailField(label='Your Email Address', validators=[validators.DataRequired(), validators.Email()])
+    email = EmailField(label='Email Address', validators=[validators.DataRequired(), validators.Email()])
     password = PasswordField(label='Password')
 
 
 class LogInForm(Form):
-    email = EmailField(label='Your Email Address', validators=[validators.DataRequired(), validators.Email()])
+    email = EmailField(label='Email Address', validators=[validators.DataRequired(), validators.Email()])
     password = PasswordField(label='Password')
 
 

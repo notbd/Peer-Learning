@@ -1,4 +1,4 @@
-{# Renders field for bootstrap 3 standards.
+{# Renders field
 
     Params:
         field - WTForm field
@@ -8,24 +8,30 @@
     Example usage:
         {{ macros.render_field(form.email, placeholder='Input email', type='email') }}
 #}
-{% macro render_field(field, label_visible=true, small_text='') -%}
 
-    <div class="form-group {% if field.errors %}has-error{% endif %} {{ kwargs.pop('class_', '') }}">
-        {% if (field.type != 'HiddenField' or field.type !='CSRFTokenField') and label_visible %}
-            <label for="{{ field.id }}" class="control-label">{{ field.label }}</label>
-        {% endif %}
-        {% if field.type in ['TextField', 'StringField', 'EmailField', 'PasswordField', 'IntegerField']%}
-            {{ field(class_='form-control', **kwargs) }}
-        {% endif %}
-        {% if small_text != '' %}
-            <small class="form-text text-muted">{{small_text}}</small>
-        {% endif %}
-        {% if field.errors %}
-            {% for e in field.errors %}
-                <p class="help-block">{{ e }}</p>
-            {% endfor %}
-        {% endif %}
-    </div>
+
+{% macro render_field(field, label_visible=true, small_text='') -%}
+<div class="form-group {% if field.errors %}has-error{% endif %} {{ kwargs.pop('class_', '') }}">
+
+    {% if (field.type != 'HiddenField' or field.type !='CSRFTokenField') and label_visible %}
+    <label for="{{ field.id }}" class="control-label">{{ field.label }}</label>
+    {% endif %}
+
+    {% if field.type in ['TextField', 'StringField', 'EmailField', 'PasswordField', 'IntegerField']%}
+    {{ field(class_='form-control', **kwargs) }}
+    {% endif %}
+
+    {% if small_text != '' %}
+    <small class="form-text text-muted">{{small_text}}</small>
+    {% endif %}
+
+    {% if field.errors %}
+    {% for e in field.errors %}
+    <p class="help-block">{{ e }}</p>
+    {% endfor %}
+    {% endif %}
+
+</div>
 {%- endmacro %}
 
 {# Renders checkbox fields since they are represented differently in bootstrap
@@ -38,19 +44,19 @@
         {{ macros.render_checkbox_field(form.remember_me) }}
  #}
 {% macro render_checkbox_field(field) -%}
-    <div class="checkbox">
-        <label>
-            {{ field(type='checkbox', **kwargs) }} {{ field.label }}
-        </label>
-    </div>
+<div class="checkbox">
+    <label>
+        {{ field(type='checkbox', **kwargs) }} {{ field.label }}
+    </label>
+</div>
 {%- endmacro %}
 
 {% macro render_date_field(field) -%}
-    <div class="date">
-        <label>
-            {{ field(class_=class_) }}
-        </label>
-    </div>
+<div class="date">
+    <label>
+        {{ field(class_=class_) }}
+    </label>
+</div>
 {%- endmacro %}
 
 {# Renders radio field
@@ -64,11 +70,11 @@
  #}
 {% macro render_radio_field(field) -%}
 
-    <div class="form-group control-group {% if field.errors %}error{% endif %}">
+<div class="form-group control-group {% if field.errors %}error{% endif %}">
     <label>
         {{ field.label }}
     </label> <br>
-        <table>
+    <table>
         <tr>
             {% for subfield in field %}
             <td style="position: relative; bottom: 3px;">{{ subfield }}</td>
@@ -76,11 +82,11 @@
             {% endfor %}
 
         </tr>
-        </table>
+    </table>
     {% if field.errors %}
-        <span class="error help-inline" style="color: red;">{{ field.errors|join(', ') }}</span>
+    <span class="error help-inline" style="color: red;">{{ field.errors|join(', ') }}</span>
     {% endif %}
-    </div>
+</div>
 
 {%- endmacro %}
 
@@ -102,21 +108,23 @@
     #}
 {% macro render_form(form, action_url='', action_text='Submit', class_='', btn_class='btn btn-default') -%}
 
-    <form method="POST" action="{{ action_url }}" role="form" class="{{ class_ }}">
-        {{ form.hidden_tag() if form.hidden_tag }}
-        {% if caller %}
-            {{ caller() }}
-        {% else %}
-            {% for f in form %}
-                {% if f.type == 'BooleanField' %}
-                    {{ render_checkbox_field(f) }}
-                {% elif f.type == 'RadioField' %}
-                    {{ render_radio_field(f) }}
-                {% else %}
-                    {{ render_field(f) }}
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-        <button type="submit" class="{{ btn_class }}">{{ action_text }} </button>
-    </form>
+<form method="POST" action="{{ action_url }}" role="form" class="{{ class_ }}">
+    {{ form.hidden_tag() if form.hidden_tag }}
+
+    {% if caller %}
+    {{ caller() }}
+    {% else %}
+    {% for f in form %}
+    {% if f.type == 'BooleanField' %}
+    {{ render_checkbox_field(f) }}
+    {% elif f.type == 'RadioField' %}
+    {{ render_radio_field(f) }}
+    {% else %}
+    {{ render_field(f) }}
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+
+    <button type="submit" class="{{ btn_class }}">{{ action_text }} </button>
+</form>
 {%- endmacro %}
