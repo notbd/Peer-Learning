@@ -8,7 +8,7 @@
     Example usage:
         {{ macros.render_field(form.email, placeholder='Input email', type='email') }}
 #}
-{% macro render_field(field, label_visible=true) -%}
+{% macro render_field(field, label_visible=true, small_text='') -%}
 
     <div class="form-group {% if field.errors %}has-error{% endif %} {{ kwargs.pop('class_', '') }}">
         {% if (field.type != 'HiddenField' or field.type !='CSRFTokenField') and label_visible %}
@@ -16,6 +16,9 @@
         {% endif %}
         {% if field.type in ['TextField', 'StringField', 'EmailField', 'PasswordField', 'IntegerField']%}
             {{ field(class_='form-control', **kwargs) }}
+        {% endif %}
+        {% if small_text != '' %}
+            <small class="form-text text-muted">{{small_text}}</small>
         {% endif %}
         {% if field.errors %}
             {% for e in field.errors %}
@@ -61,16 +64,19 @@
  #}
 {% macro render_radio_field(field) -%}
 
-    <div class="control-group {% if field.errors %}error{% endif %}">
+    <div class="form-group control-group {% if field.errors %}error{% endif %}">
     <label>
         {{ field.label }}
     </label> <br>
-    {% for subfield in field %}
+        <table>
         <tr>
-            <td>{{ subfield }}</td>
-            <td>{{ subfield.label }}</td>
+            {% for subfield in field %}
+            <td style="position: relative; bottom: 3px;">{{ subfield }}</td>
+            <td style="padding-right:10px;">{{ subfield.label }}</td>
+            {% endfor %}
+
         </tr>
-    {% endfor %}
+        </table>
     {% if field.errors %}
         <span class="error help-inline" style="color: red;">{{ field.errors|join(', ') }}</span>
     {% endif %}

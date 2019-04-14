@@ -57,10 +57,11 @@ def signup():
 
     if request.method == 'POST':
         if not form.validate():
-            return form.errors
+            return str(form.errors)
         user = User(email=form.email.data, password=form.password.data, user_type=form.user_type.data,
                     name=form.name.data)
         user_repr = str(user)
+        print("user to sign up: ", user_repr)
         try:
             # db.session.add(user)
             db.session.execute(
@@ -70,11 +71,11 @@ def signup():
                 (user.email, user.password, user.name, user.user_type))
             db.session.commit()
             db.session.close()
+            return redirect(url_for('login', data=request.form.get('data')), code=307)
         except Exception as e:
             db.session.rollback()
             # TODO: render form with error msg
             return str(e)
-        return render_template('thanks.html', notes=user_repr)
 
     else:  # GET
         return render_template("signup.html", form=form)

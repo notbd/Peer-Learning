@@ -28,30 +28,16 @@
     <h1 class="cover-heading">Sign Up</h1>
     <hr>
     
-    <form>
+    <form method="post" action="/signup"  id="db_post" name="db_post">
+        {{ form.hidden_tag() }}
+        {{ macros.render_radio_field(form.user_type) }}
+        {{ macros.render_field(form.name, placeholder='Please enter your full name', type='name', label_visible=true) }}
 
-      <div class="form-group">
-          <label for="nameInput">Your Name</label>
-          <input type="name" class="form-control" id="nameInput" placeholder="Please enter your full name">
-      </div>
-      
-      <hr>
+        {{ macros.render_field(form.email, placeholder='example@illinois.edu', type='email', label_visible=true, small_text='This will become your future login credential.') }}
 
-      <div class="form-group">
-        <label for="emailInput">Your Email Address</label>
-        <input type="email" class="form-control" id="emailInput" aria-describedby="emailHelp" placeholder="example@illinois.edu">
-        <small id="emailHelp" class="form-text text-muted">This will become your future login credential.</small>
-      </div>
+        {{ macros.render_field(form.password, placeholder='Your password here', type='password', label_visible=true, small_text='Think twice - you cannot recover your password.') }}
 
-      <div class="form-group">
-        <label for="passwordInput">Password</label>
-        <input type="password" class="form-control" id="passwordInput" aria-describedby="passwordHelp" placeholder="Your password here">
-        <small id="passwordHelp" class="form-text text-muted">Think twice - you cannot recover your password.</small>
-      </div>
-
-      <hr>
-
-      <button type="submit" class="btn btn-primary">Submit</button>
+      <button type="submit" class="btn btn-primary">Sign Up</button>
     </form>
 
   </main>
