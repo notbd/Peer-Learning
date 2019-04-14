@@ -28,8 +28,17 @@
           <div class="inner">
             <h3 class="masthead-brand">Peer Learning</h3>
             <nav class="nav nav-masthead justify-content-center">
-              <a class="nav-link active" href="index">Home</a>
-              <a class="nav-link" href="#">About</a>
+              {% if nav_tabs is not defined %}
+                <a class="nav-link active" href="index">Home</a>
+              {% else %}
+                {% for text, href in nav_tabs %}
+                  {% if active_tab == text %}
+                      <a class="nav-link active" href="{{href}}">{{text}}</a>
+                  {% else %}
+                      <a class="nav-link" href="{{href}}">{{text}}</a>
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
             </nav>
           </div>
         </header>

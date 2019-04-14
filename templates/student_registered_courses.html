@@ -1,4 +1,6 @@
 {% extends "base.html" %} {% import 'macros.html' as macros %}
+{% set nav_tabs = [("Home", "/dashboard/student/courses"), ("Profile", "/dashboard/student/profile"), ("Log out", "/logout")] %}
+{% set active_tab = "Home" %}
 {% block content %}
 
 <style>
@@ -18,11 +20,6 @@ td, th {
 
 
 </style>
-
-
-<form action="/logout" method="post">
-    <button type="submit" style="float: right;">Log Out</button>
-</form>
 
 <div class="col-md-4 col-md-offset-4">
 

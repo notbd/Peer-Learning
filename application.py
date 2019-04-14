@@ -107,7 +107,7 @@ def login():
         return render_template("login.html", form=form)
 
 
-@application.route('/logout', methods=['POST'])
+@application.route('/logout', methods=['GET'])
 def logout():
     flask_login.logout_user()
     return redirect(url_for("login"))

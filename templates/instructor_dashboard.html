@@ -1,4 +1,6 @@
 {% extends "base.html" %} {% import 'macros.html' as macros %}
+{% set nav_tabs = [("Home", "/dashboard/instructor/courses"), ("Profile", "/dashboard/instructor/profile"), ("Log out", "/logout")] %}
+{% set active_tab = "Home" %}
 {% block content %}
 
 <style>
@@ -33,14 +35,11 @@ $(document).ready(function(){
 });
 </script>
 
-<form action="/logout" method="post">
-    <button type="submit" style="float: right;">Log Out</button>
-</form>
 
 <div class="col-md-4 col-md-offset-4">
 
       <div align="center">
-        <h2>Instructor Dashboard for {{current_user.name}}</h2>
+        <h2>Hello {{current_user.name}}!</h2>
       </div>
 
 <br>
