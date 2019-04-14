@@ -49,6 +49,8 @@ class Course(db.Model):
     year = db.Column(db.Integer, nullable=False)
     term = db.Column(db.String(10), nullable=False)
     instructor = db.Column(db.String(120), db.ForeignKey('user.email'))
+    active_question = db.Column(db.Integer,
+                                nullable=True)  # supposed to be a foreign key, but will cause circular dependency
 
     def __init__(self, CRN, title, year, term, instructor):
         self.CRN = CRN
@@ -56,6 +58,8 @@ class Course(db.Model):
         self.title = title
         self.term = term
         self.instructor = instructor
+        self.active_question = None
+
 
 class Take(db.Model):
     CRN = db.Column(db.String(120), db.ForeignKey('course.CRN'), primary_key=True)

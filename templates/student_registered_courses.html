@@ -45,7 +45,7 @@ td, th {
       {% for c in courses %}
         <tr>
           <td>{{ c.CRN }}</td>
-          <td>{{ c.title }}</td>
+            <td><a href="/dashboard/student/course/{{c.CRN}}">{{ c.title }}</a></td>
           <td>{{ c.year }}</td>
           <td>{{ c.term }}</td>
           <td>{{ c.instructor }}</td>

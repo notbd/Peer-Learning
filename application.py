@@ -189,7 +189,8 @@ def delete_course(CRN):
         return str(e)
     return redirect(url_for('instructor_dashboard'))
 
-@application.route('/dashboard/instructor/course/question/<CRN>', methods=['GET','POST'])
+
+@application.route('/dashboard/instructor/course/question/<CRN>', methods=['GET', 'POST'])
 def check_question(CRN):
     if flask_login.current_user is None or flask_login.current_user.is_anonymous:
         return redirect(url_for('login'))
@@ -205,10 +206,10 @@ def check_question(CRN):
             questions = db.session.execute('SELECT * FROM Question WHERE CRN="%s"' % (CRN)).fetchall()
             if questions is not None:
                 for q in questions:
-                    query_results.append([q.id,q.date,q.question])
+                    query_results.append([q.id, q.date, q.question])
             db.session.close()
             return render_template("add_question.html", current_user=flask_login.current_user,
-                                                query_results=query_results, CRN=CRN, add_question_form=add_question_form)
+                                   query_results=query_results, CRN=CRN, add_question_form=add_question_form)
         except Exception as e:
             db.session.rollback()
             return str(e)
@@ -226,7 +227,8 @@ def check_question(CRN):
             return ('<h1>Failed. The question content is empty.</h1>')
         date_object = datetime.datetime.strptime(date, '%m/%d/%Y')
         try:
-            db.session.execute('INSERT INTO Question (crn,date,question) VALUES (:crn,:qdate,:question)', {'crn':CRN, 'qdate':date_object,'question':question})
+            db.session.execute('INSERT INTO Question (crn,date,question) VALUES (:crn,:qdate,:question)',
+                               {'crn': CRN, 'qdate': date_object, 'question': question})
             db.session.commit()
             db.session.close()
         except Exception as e:
@@ -234,7 +236,9 @@ def check_question(CRN):
             # TODO: render form with error msg
             return str(e)
         return redirect(url_for('instructor_dashboard'))
-    return render_template("add_question.html", current_user=flask_login.current_user,CRN=CRN, add_question_form=add_question_form)
+    return render_template("add_question.html", current_user=flask_login.current_user, CRN=CRN,
+                           add_question_form=add_question_form)
+
 
 @application.route('/dashboard/student/<CRN>', methods=['POST'])
 def register_course(CRN):
@@ -343,6 +347,25 @@ def student_dashboard():
     return render_template('student_dashboard.html', current_user=flask_login.current_user, form2=form2)
 
 
+@application.route('/dashboard/student/course/<CRN>', methods=['GET', 'POST'])
+def student_question_page(CRN):
+    # TODO: verify that this student is registered for this class
+
+    if request.method == 'GET':
+        try:
+            active_question = db.session.execute(
+                'SELECT q.question FROM question q WHERE id in '
+                '(SELECT active_question FROM course '
+                'WHERE CRN="%s")' % CRN).fetchone()
+            db.session.close()
+            return render_template("student_question_page.html", question=active_question)
+        except Exception as e:
+            return str(e)
+    elif request.method == 'POST':
+        # TODO: implement student submitting question response
+        return "POST method not yet implemented"
+
+
 @application.route('/update/')
 def update():
     name = request.args.get('name')
@@ -375,7 +398,7 @@ def course_from_form(course_form):
 
 
 @application.route("/query-parser-test", methods=['GET', 'POST'])
-def test_run_executable():
+def query_parser_test():
     if request.method == 'GET':
         return """
         <form action="/query-parser-test" method="post">
@@ -400,15 +423,10 @@ def test_run_executable():
             table1 = request.form['table1name'] + "," + request.form['table1columns']
             table2 = request.form['table2name'] + "," + request.form['table2columns']
             sql_queries = request.form['query'].split('\n')
-            analysis =  query_parser.concise_report(
-                    *query_parser.parse_multiple_query(sql_queries, [table1, table2])
-                )
+            analysis = query_parser.concise_report(
+                *query_parser.parse_multiple_query(sql_queries, [table1, table2])
+            )
             return render_template("query_analysis.html", analysis=analysis)
-            # return jsonify(
-            #     query_parser.concise_report(
-            #         *query_parser.parse_multiple_query(sql_queries, [table1, table2])
-            #     )
-            # )
         except Exception as e:
             return str(e)
 
