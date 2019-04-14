@@ -21,37 +21,30 @@ td, th {
 
 </style>
 
-<div class="col-md-4 col-md-offset-4">
-
-      <div align="center">
-        <h2>{{current_user.name}}: courses registered</h2>
-      </div>
-
-<br>
-
-<h4>Courses</h4>
+<main role="main" class="inner cover">
+    <h2 class="cover-heading" style="float:left">Registered Courses</h2>
     <table>
-    <tbody>
-    <tr>
-        <td>CRN</td>
-        <td>title</td>
-        <td>year</td>
-        <td>term</td>
-        <td>instructor's name</td>
-    </tr>
-      {% for c in courses %}
+        <tbody>
         <tr>
-          <td>{{ c.CRN }}</td>
-            <td><a href="/dashboard/student/course/{{c.CRN}}">{{ c.title }}</a></td>
-          <td>{{ c.year }}</td>
-          <td>{{ c.term }}</td>
-          <td>{{ c.instructor }}</td>
+            <td>CRN</td>
+            <td>title</td>
+            <td>year</td>
+            <td>term</td>
+            <td>instructor</td>
         </tr>
-      {% endfor %}
-    </tbody>
+        {% for c in courses %}
+        <tr>
+            <td>{{ c.CRN }}</td>
+            <td><a href="/dashboard/student/course/{{c.CRN}}">{{ c.title }}</a></td>
+            <td>{{ c.year }}</td>
+            <td>{{ c.term }}</td>
+            <td>{{ c.instructor }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
     </table>
-<br>
+    <br>
 
-</div>
+</main>
 
 {% endblock %}
