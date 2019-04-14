@@ -402,10 +402,10 @@ def student_question_page(CRN):
             return str(e)
 
 
-@application.route('/update/')
-def update():
-    name = request.args.get('name')
-    return render_template('update.html')
+@application.route('/dashboard/student/profile')
+@application.route('/dashboard/instructor/profile')
+def profile():
+    return render_template('profile.html', user=flask_login.current_user)
 
 
 @application.route('/updateaction/', methods=['POST'])
