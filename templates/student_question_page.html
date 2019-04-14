@@ -41,7 +41,6 @@ p {
               <p>{{question[1]}}</p>
               <form method="post">
                 <input type="hidden" name="qid" value="{{question[0]}}">
-                <input type="hidden" name="q_content" value="{{question[1]}}">
                 <textarea name="response" rows="10">{{response}}</textarea> <br>
                   {% if msg is defined %}
                     <small class="text-muted">{{msg}}</small>

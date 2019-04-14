@@ -187,6 +187,7 @@ def delete_course(CRN):
         return str(e)
     return redirect(url_for('instructor_dashboard'))
 
+
 @application.route('/set-active-question', methods=['POST'])
 def set_active_question():
     print(request.form)
@@ -205,6 +206,8 @@ def set_active_question():
         return "data: " + str(request.form['qid']) + " " + str(e)
 
 
+# @application.route('/dashboard/instructor/course/session/<date>', methods=['GET', 'POST'])
+# def
 
 
 @application.route('/dashboard/instructor/course/question/<CRN>', methods=['GET', 'POST'])
@@ -257,8 +260,8 @@ def check_question(CRN):
             # TODO: render form with error msg
             return str(e)
         return redirect(url_for('check_question', CRN=CRN))
-    # return render_template("add_question.html", current_user=flask_login.current_user, CRN=CRN,
-    #                        add_question_form=add_question_form)
+        # return render_template("add_question.html", current_user=flask_login.current_user, CRN=CRN,
+        #                        add_question_form=add_question_form)
 
 
 @application.route('/dashboard/student/<CRN>', methods=['POST'])
@@ -389,15 +392,17 @@ def student_question_page(CRN):
             return redirect(url_for(student_question_page))
 
         qid = request.form.get('qid')
-        q_content = request.form.get('q_content')
+        question = db.session.execute(
+            'SELECT q.id, q.question, q.schemas FROM question q WHERE id = %s ' % qid).fetchone()
         user_id = flask_login.current_user.email
 
         try:
             db.session.execute(
-                'INSERT INTO response VALUES ("%s", "%s", "%s")' %(qid, user_id, response)
+                'INSERT INTO response VALUES ("%s", "%s", "%s")' % (qid, user_id, response)
             )
             db.session.close()
-            return render_template("student_question_page.html", question=(qid, q_content), response=response, msg="Response submitted!")
+            return render_template("student_question_page.html", question=question, response=response,
+                                   msg="Response submitted!")
         except Exception as e:
             return str(e)
 
@@ -466,10 +471,10 @@ def query_parser_test():
         except Exception as e:
             return str(e)
 
+
 # developement use only
 @application.route("/any-query", methods=['GET', 'POST'])
 def any_query():
-
     if request.method == 'GET':
         return """
         <form action="/any-query" method="post">
