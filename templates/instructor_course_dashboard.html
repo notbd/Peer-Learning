@@ -35,22 +35,33 @@ $(document).ready(function(){
 });
 </script>
 
-<div class="col-md-4 col-md-offset-4">
 
-      <div align="center">
-        <h2>Course Dashboard</h2>
-      </div>
+<main role="main" class="inner cover">
+    <h2 class="cover-heading" style="float:left">Questions for {{course_title}}</h2>
+    <!--<form>-->
+        <!--<button type="submit" style="float:right" class="btn btn-secondary" formaction="/course/delete/{{course_CRN}}" formmethod="post"> Delete course </button>-->
+    <!--</form>-->
 
-<br>
-    instructor:  {{current_user.name}}
-<br>
-    course: {{course.title}}
-    <form>
-        <button type="submit" formaction="/course/delete/{{course.CRN}}" formmethod="post"> Delete course </button>
-    </form>
-		<form>
-        <button type="submit" formaction="/dashboard/instructor/course/question/{{course.CRN}}" formmethod="get"> Questions </button>
-    </form>
+    <table>
+        <tr>
+            <th>session date</th>
+            <th># questions</th>
+        </tr>
+        {% for date, cnt in session_info %}
+        <tr>
+            <td><a href="/dashboard/instructor/{{course_CRN}}/{{date[:10]}}">{{date[:10]}}</a></td>
+            <td>{{cnt}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</main>
+
+<div align="center">
+
+
+		<!--<form>-->
+        <!--<button type="submit" formaction="/dashboard/instructor/course/question/{{course_CRN}}" formmethod="get"> Questions </button>-->
+    <!--</form>-->
 </div>
 
 {% endblock %}

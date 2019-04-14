@@ -157,18 +157,15 @@ def instructor_dashboard():
 @application.route('/dashboard/instructor/course/<CRN>', methods=['GET'])
 def course_dashboard(CRN):
     try:
-        fetched_course = db.session.execute(
-            'SELECT * FROM course '
+        course_CRN, course_title = db.session.execute(
+            'SELECT CRN, title FROM course '
             'WHERE CRN="%s"' % CRN).fetchone()
-        if fetched_course is None:
-            db.session.close()
-            return redirect("instructor_dashboard")
-        else:
-            course = Course(CRN=fetched_course.CRN, title=fetched_course.title, year=fetched_course.year,
-                            term=fetched_course.term, instructor=fetched_course.instructor)
-            db.session.close()
-            return render_template("instructor_course_dashboard.html", current_user=flask_login.current_user,
-                                   course=course)
+        session_info = db.session.execute(
+            'SELECT date, COUNT(*) FROM question WHERE CRN="%s" GROUP BY date ORDER BY date DESC' % CRN
+        ).fetchall()
+        db.session.close()
+        return render_template("instructor_course_dashboard.html", current_user=flask_login.current_user,
+                               course_title=course_title, course_CRN=course_CRN, session_info=session_info)
     except Exception as e:
         db.session.rollback()
         # TODO: render form with error msg
