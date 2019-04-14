@@ -54,12 +54,13 @@ $(document).ready(function(){
 
 
 <main role="main" class="inner cover">
+    <!--question div-->
     <div style="background-color: #505c61; padding:10px">
         <button style="float:right">Edit</button>
         {% if is_active %}
-        <button id="startQuestionBtn" style="float:right" disabled  data-qid="{{q.id}}" data-crn="{{q.crn}}">Start</button>
+        <button id="startQuestionBtn" style="float:right" disabled  data-qid="{{q.id}}" data-crn="{{q.CRN}}">Start</button>
         {% else %}
-        <button id="startQuestionBtn" style="float:right" data-qid="{{q.id}}" data-crn="{{q.crn}}">Start</button>
+        <button id="startQuestionBtn" style="float:right" data-qid="{{q.id}}" data-crn="{{q.CRN}}">Start</button>
         {% endif %}
         {% if q.schemas is not none %}
         <div style="color:#7a9fab;">
@@ -73,6 +74,14 @@ $(document).ready(function(){
         {% endif %}
         <p>{{q.question}}</p>
     </div>
+
+    <!--response divs-->
+    {% for student, response in responses %}
+    <div style="background-color: #7a9ba9; padding:10px; margin-top:10px;">
+        <p style="text-align:right;  color:#324b54; text-shadow:none;">{{student}}</p>
+        <p style="font-family:monospace;">{{response}}</p>
+    </div>
+    {% endfor %}
 </main>
 
 

@@ -87,6 +87,7 @@ def logout():
     flask_login.logout_user()
     return redirect(url_for("login"))
 
+
 # page where instructor can view the list of courses and add new course
 @application.route('/dashboard/instructor/courses', methods=['GET', 'POST'])
 def instructor_dashboard():
@@ -128,6 +129,7 @@ def instructor_dashboard():
     return render_template("instructor_dashboard.html", current_user=flask_login.current_user,
                            add_course_form=add_course_form)
 
+
 # page where instructor can view the list of sessions in a course and add new questions
 @application.route('/dashboard/instructor/course/<CRN>', methods=['GET'])
 def instructor_course_dashboard(CRN):
@@ -147,6 +149,7 @@ def instructor_course_dashboard(CRN):
         return str(e)
 
 
+# backend-only function for an instructor to delete a course
 @application.route('/course/delete/<CRN>', methods=['POST'])
 def delete_course(CRN):
     # TODO: authenticate user permission
@@ -189,16 +192,18 @@ def instructor_question(qid=None):
     if request.method == 'GET':
         try:
             q = db.session.execute(
-                'SELECT id, question, schemas, crn FROM Question WHERE id=%s' % (qid)).fetchone()
-            qid, question, schemas, crn = q
+                'SELECT question, schemas, crn FROM Question WHERE id=%s' % (qid)).fetchone()
+            question, schemas, crn = q
             active_question = db.session.execute(
                 'SELECT active_question FROM course '
                 'WHERE CRN="%s"' % crn).fetchone()[0]
+            responses = db.session.execute(
+                'SELECT student, response FROM response WHERE question_id =' + qid
+            ).fetchall()
             db.session.close()
             q = Question(qid, question, schemas, crn)
-            is_active = qid==active_question
-            print(qid, active_question, is_active)
-            return render_template("instructor_question_dashboard.html", q=q, is_active=is_active)
+            is_active = qid == active_question
+            return render_template("instructor_question_dashboard.html", q=q, is_active=is_active, responses=responses)
         except Exception as e:
             return str(e)
     else:
@@ -212,7 +217,7 @@ def instructor_question(qid=None):
         try:
             db.session.execute('INSERT INTO Question (crn,date,schemas,question) '
                                'VALUES (:crn,:qdate,:schemas, :question)',
-                               {'crn': crn, 'qdate': date, 'schemas':schemas, 'question': question})
+                               {'crn': crn, 'qdate': date, 'schemas': schemas, 'question': question})
             db.session.commit()
             db.session.close()
         except Exception as e:
@@ -220,6 +225,7 @@ def instructor_question(qid=None):
             # TODO: render form with error msg
             return str(e)
         return redirect(url_for('instructor_session', CRN=crn, date=date))
+
 
 # page where instructor can manage the questions for a single session
 @application.route('/dashboard/instructor/session/<CRN>/<date>', methods=['GET', 'POST'])
@@ -246,6 +252,7 @@ def instructor_session(CRN, date):
             return str(e)
     else:
         return "Not yet implemented"
+
 
 @application.route('/dashboard/student/<CRN>', methods=['POST'])
 def register_course(CRN):
@@ -375,14 +382,16 @@ def student_question_page(CRN):
             return redirect(url_for(student_question_page))
 
         qid = request.form.get('qid')
-        question = db.session.execute(
-            'SELECT q.id, q.question, q.schemas FROM question q WHERE id = %s ' % qid).fetchone()
+
         user_id = flask_login.current_user.email
 
         try:
+            question = db.session.execute(
+                'SELECT q.id, q.question, q.schemas FROM question q WHERE id = %s ' % qid).fetchone()
             db.session.execute(
                 'INSERT INTO response VALUES ("%s", "%s", "%s")' % (qid, user_id, response)
             )
+            db.session.commit()
             db.session.close()
             return render_template("student_question_page.html", question=question, response=response,
                                    msg="Response submitted!")
