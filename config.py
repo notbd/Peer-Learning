@@ -4,10 +4,10 @@
 
 
 # Uncomment the line below to work with AWS DB
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://smileyface:cs411project@rds-mysql-411project.csfttfyvdoqe.us-east-1.rds.amazonaws.com/project'
+# SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://smileyface:cs411project@rds-mysql-411project.csfttfyvdoqe.us-east-1.rds.amazonaws.com/project'
 
 # Uncomment the line below to work with a local DB
-# SQLALCHEMY_DATABASE_URI = 'sqlite:///test.db'
+SQLALCHEMY_DATABASE_URI = 'sqlite:///test.db'
 
 SQLALCHEMY_POOL_RECYCLE = 3600
 
