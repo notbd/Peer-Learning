@@ -1,0 +1,14 @@
+{% extends "base.html" %} {% import 'macros.html' as macros %}
+{% set nav_tabs = [("Home", "/dashboard/instructor/courses"), ("Profile", "/dashboard/instructor/profile"), ("Log out", "/logout")] %}
+{% set active_tab = "Profile" %}
+{% block content %}
+
+<main role="main" class="inner cover">
+    <!--TODO: make it a form, so that user can update name/email-->
+    <h3 class="cover-heading"> Name: {{user.name}} </h3>
+    <h3 class="cover-heading"> Email: {{user.email}} </h3>
+</main>
+
+
+
+{% endblock %}
