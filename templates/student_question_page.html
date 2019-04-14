@@ -9,7 +9,11 @@ textarea {
     outline: none;
     padding: 10px;
     font-family: monospace;
-}
+    width:100%;
+    margin-bottom: 10px;
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+            box-sizing: border-box;}
 </style>
 
 <main role="main" class="inner cover">
@@ -18,8 +22,16 @@ textarea {
           <p>No question at this moment :)</p>
         {% else %}
           <div style="margin:20; word-wrap: break-word;">
-              <p style="margin-left:10">{{question}}</p>
-              <textarea rows="10" cols="50"></textarea>
+              <p style="margin-left:10">{{question[1]}}</p>
+              <form method="post">
+                <input type="hidden" name="qid" value="{{question[0]}}">
+                <input type="hidden" name="q_content" value="{{question[1]}}">
+                <textarea name="response" rows="10">{{response}}</textarea> <br>
+                  {% if msg is defined %}
+                    <small class="text-muted">{{msg}}</small>
+                  {% endif %}
+                <button type="submit" class="btn btn-primary" style="float:right">Submit</button>
+              </form>
           </div>
         {% endif %}
 </main>

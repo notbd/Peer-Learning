@@ -71,6 +71,7 @@ class Question(db.Model):
     CRN = db.Column(db.String(120), db.ForeignKey('course.CRN'))
     date = db.Column(db.Date())
     question = db.Column(db.String(300))
+    schemas = db.Column(db.String(1000), nullable=True)
 
 
 class Response(db.Model):

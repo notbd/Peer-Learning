@@ -375,16 +375,31 @@ def student_question_page(CRN):
     if request.method == 'GET':
         try:
             active_question = db.session.execute(
-                'SELECT q.question FROM question q WHERE id in '
+                'SELECT q.id, q.question FROM question q WHERE id in '
                 '(SELECT active_question FROM course '
-                'WHERE CRN="%s")' % CRN).fetchone()[0]
+                'WHERE CRN="%s")' % CRN).fetchone()
             db.session.close()
             return render_template("student_question_page.html", question=active_question)
         except Exception as e:
             return str(e)
     elif request.method == 'POST':
         # TODO: implement student submitting question response
-        return "POST method not yet implemented"
+        response = request.form.get("response").strip()
+        if len(response) < 0:
+            return redirect(url_for(student_question_page))
+
+        qid = request.form.get('qid')
+        q_content = request.form.get('q_content')
+        user_id = flask_login.current_user.email
+
+        try:
+            db.session.execute(
+                'INSERT INTO response VALUES ("%s", "%s", "%s")' %(qid, user_id, response)
+            )
+            db.session.close()
+            return render_template("student_question_page.html", question=(qid, q_content), response=response, msg="Response submitted!")
+        except Exception as e:
+            return str(e)
 
 
 @application.route('/update/')
