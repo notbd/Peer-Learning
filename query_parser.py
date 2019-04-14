@@ -2,7 +2,6 @@ import json5
 import subprocess
 from collections import Counter, defaultdict
 
-
 def parse_single_query(query, tables):
     p = subprocess.Popen(["static/query_parser", query] + tables, stdout=subprocess.PIPE,  stderr=subprocess.PIPE)
     stdout, stderr = p.communicate()
@@ -16,11 +15,24 @@ def parse_single_query(query, tables):
 
 
 def parse_multiple_query(queries, tables):
+    # format queries
+    queries = [q[0] for q in queries]
+    print(queries)
+
+    # format schema
+    table_list = []
+    for table in tables.split("|"):
+        table_name, columns = table.split("(")
+        table_name = table_name.lower()
+        columns = columns[:-1]
+        table_list.append(table_name+","+columns)
+    print(table_list)
+
     column_access_freq = defaultdict(Counter)
     join_freq = Counter()
     table_acess_freq = Counter()
     for q in queries:
-        parse_result = parse_single_query(q, tables)
+        parse_result = parse_single_query(q, table_list)
         if parse_result is None:
             continue
         for col, clause in parse_result['columns_accessed_by_clause']:

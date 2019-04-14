@@ -389,7 +389,7 @@ def student_question_page(CRN):
             question = db.session.execute(
                 'SELECT q.id, q.question, q.schemas FROM question q WHERE id = %s ' % qid).fetchone()
             db.session.execute(
-                'INSERT INTO response VALUES ("%s", "%s", "%s")' % (qid, user_id, response)
+                'INSERT INTO response (question_id, student, response) VALUES ("%s", "%s", "%s")' % (qid, user_id, response)
             )
             db.session.commit()
             db.session.close()
@@ -430,6 +430,21 @@ def course_from_form(course_form):
                   instructor=flask_login.current_user.email)
 
 
+@application.route("/analyze-responses/<qid>", methods=['GET'])
+def analyze_responses(qid):
+    try:
+        question, schemas = db.session.execute('SELECT question, schemas FROM question WHERE id=' + qid).fetchone()
+        responses = db.session.execute('SELECT response FROM response WHERE question_id=' + qid).fetchall()
+        db.session.close()
+        analysis = query_parser.concise_report(
+            *query_parser.parse_multiple_query(responses, schemas)
+        )
+        return render_template("query_analysis.html", analysis=analysis)
+    except Exception as e:
+        return str(e)
+
+
+# debug use only, to test query parser
 @application.route("/query-parser-test", methods=['GET', 'POST'])
 def query_parser_test():
     if request.method == 'GET':
@@ -453,11 +468,11 @@ def query_parser_test():
         """
     else:
         try:
-            table1 = request.form['table1name'] + "," + request.form['table1columns']
-            table2 = request.form['table2name'] + "," + request.form['table2columns']
+            table1 = request.form['table1name'] + "(" + request.form['table1columns'] + ")"
+            table2 = request.form['table2name'] + "(" + request.form['table2columns'] + ")"
             sql_queries = request.form['query'].split('\n')
             analysis = query_parser.concise_report(
-                *query_parser.parse_multiple_query(sql_queries, [table1, table2])
+                *query_parser.parse_multiple_query(sql_queries, table1 + "|" + table2)
             )
             return render_template("query_analysis.html", analysis=analysis)
         except Exception as e:

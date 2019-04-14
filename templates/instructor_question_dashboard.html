@@ -55,7 +55,7 @@ $(document).ready(function(){
 
 <main role="main" class="inner cover">
     <!--question div-->
-    <div style="background-color: #505c61; padding:10px">
+    <div style="background-color: #505c61; padding:10px;  overflow: hidden">
         <button style="float:right">Edit</button>
         {% if is_active %}
         <button id="startQuestionBtn" style="float:right" disabled  data-qid="{{q.id}}" data-crn="{{q.CRN}}">Start</button>
@@ -73,7 +73,10 @@ $(document).ready(function(){
         </div>
         {% endif %}
         <p>{{q.question}}</p>
+        <button style="float:right" onclick="window.open('/analyze-responses/{{q.id}}','_blank')">Analyze responses</button>
     </div>
+
+
 
     <!--response divs-->
     {% for student, response in responses %}
