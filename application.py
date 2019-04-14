@@ -375,7 +375,7 @@ def student_question_page(CRN):
     if request.method == 'GET':
         try:
             active_question = db.session.execute(
-                'SELECT q.id, q.question FROM question q WHERE id in '
+                'SELECT q.id, q.question, q.schemas FROM question q WHERE id in '
                 '(SELECT active_question FROM course '
                 'WHERE CRN="%s")' % CRN).fetchone()
             db.session.close()
@@ -463,6 +463,27 @@ def query_parser_test():
                 *query_parser.parse_multiple_query(sql_queries, [table1, table2])
             )
             return render_template("query_analysis.html", analysis=analysis)
+        except Exception as e:
+            return str(e)
+
+# developement use only
+@application.route("/any-query", methods=['GET', 'POST'])
+def any_query():
+
+    if request.method == 'GET':
+        return """
+        <form action="/any-query" method="post">
+            <textarea type="text" name="query" rows="10" cols="300"></textarea>
+            <br><br>
+            <input type="submit" value="Submit">
+        </form>
+        """
+    else:
+        try:
+            db.session.execute(request.form['query'])
+            db.session.commit()
+            db.session.close()
+            return "success"
         except Exception as e:
             return str(e)
 

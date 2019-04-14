@@ -13,16 +13,32 @@ textarea {
     margin-bottom: 10px;
     -webkit-box-sizing: border-box;
        -moz-box-sizing: border-box;
-            box-sizing: border-box;}
+            box-sizing: border-box;
+}
+
+p {
+    margin-left: 10px;
+}
 </style>
 
 <main role="main" class="inner cover">
     <h2 class="cover-heading">Question</h2>
+
         {% if question is none %}
-          <p>No question at this moment :)</p>
+          <p>No question at this moment! :)</p>
         {% else %}
           <div style="margin:20; word-wrap: break-word;">
-              <p style="margin-left:10">{{question[1]}}</p>
+              {% if question[2] is not none %}
+              <div style="color:#7a9fab;">
+                <p style="font-family:monospace">Schemas:
+              <!--schemas is stored (in db) in the format of: Employee(id,name,gender,salary)|Project(id,name)-->
+                {% for schema in question[2].split("|") %}
+                    <br>{{schema}}
+                {% endfor %}
+                </p>
+              </div>
+              {% endif %}
+              <p>{{question[1]}}</p>
               <form method="post">
                 <input type="hidden" name="qid" value="{{question[0]}}">
                 <input type="hidden" name="q_content" value="{{question[1]}}">
