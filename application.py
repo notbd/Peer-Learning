@@ -189,6 +189,25 @@ def delete_course(CRN):
         return str(e)
     return redirect(url_for('instructor_dashboard'))
 
+@application.route('/set-active-question', methods=['POST'])
+def set_active_question():
+    print(request.form)
+    try:
+        db.session.execute(
+            'UPDATE course '
+            'SET active_question = %s '
+            'WHERE CRN = %s' % (request.form['qid'], request.form['crn'])
+        )
+        db.session.commit()
+        db.session.close()
+        return "set active question successful"
+    except Exception as e:
+        db.session.rollback()
+        # TODO: render form with error msg
+        return "data: " + str(request.form['qid']) + " " + str(e)
+
+
+
 
 @application.route('/dashboard/instructor/course/question/<CRN>', methods=['GET', 'POST'])
 def check_question(CRN):
@@ -204,12 +223,16 @@ def check_question(CRN):
             # questions = db.session.execute('SELECT * FROM Question WHERE Question.CRN=:crn',{'crn':CRN}).fetchall()
             query_results = []
             questions = db.session.execute('SELECT * FROM Question WHERE CRN="%s"' % (CRN)).fetchall()
+            active_question = db.session.execute(
+                'SELECT active_question FROM course '
+                'WHERE CRN="%s"' % CRN).fetchone()[0]
             if questions is not None:
                 for q in questions:
                     query_results.append([q.id, q.date, q.question])
             db.session.close()
             return render_template("add_question.html", current_user=flask_login.current_user,
-                                   query_results=query_results, CRN=CRN, add_question_form=add_question_form)
+                                   query_results=query_results, CRN=CRN, add_question_form=add_question_form,
+                                   active_question=active_question)
         except Exception as e:
             db.session.rollback()
             return str(e)
@@ -235,9 +258,9 @@ def check_question(CRN):
             db.session.rollback()
             # TODO: render form with error msg
             return str(e)
-        return redirect(url_for('instructor_dashboard'))
-    return render_template("add_question.html", current_user=flask_login.current_user, CRN=CRN,
-                           add_question_form=add_question_form)
+        return redirect(url_for('check_question', CRN=CRN))
+    # return render_template("add_question.html", current_user=flask_login.current_user, CRN=CRN,
+    #                        add_question_form=add_question_form)
 
 
 @application.route('/dashboard/student/<CRN>', methods=['POST'])
@@ -356,7 +379,7 @@ def student_question_page(CRN):
             active_question = db.session.execute(
                 'SELECT q.question FROM question q WHERE id in '
                 '(SELECT active_question FROM course '
-                'WHERE CRN="%s")' % CRN).fetchone()
+                'WHERE CRN="%s")' % CRN).fetchone()[0]
             db.session.close()
             return render_template("student_question_page.html", question=active_question)
         except Exception as e:

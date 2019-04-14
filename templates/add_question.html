@@ -28,7 +28,38 @@ $(document).ready(function(){
 	$('#AddQuestionButton').click(function(){
   		$('#AddQuestionForm').toggle(500);
   });
+
+  $('.start-question-btn').click(function() {
+    $('.start-question-btn').prop('disabled', true);
+    $('.end-question-btn').prop('disabled', true);
+    var qid = $(this).data('qid');
+    var crn = $(this).data('crn');
+    var data = {
+        crn: crn,
+        qid: qid
+    }
+    $.post("/set-active-question", data, function(data, status) {
+        console.log(`${data} and status is ${status}`)
+        location.reload();
+    });
+  });
+
+  $('.end-question-btn').click(function() {
+  $('.start-question-btn').prop('disabled', true);
+    $('.end-question-btn').prop('disabled', true);
+    var crn = $(this).data('crn');
+    var data = {
+        crn: crn,
+        qid: null
+    }
+    $.post("/set-active-question", data, function(data, status) {
+        console.log(`${data} and status is ${status}`)
+        location.reload();
+    });
+  });
 });
+
+
 </script>
 
 <form action="/logout" method="post">
@@ -44,6 +75,7 @@ $(document).ready(function(){
 
 <br>
 <div>
+    {{active_question}}
   <h4>Questions</h4>
       <table>
       <tbody>
@@ -51,12 +83,20 @@ $(document).ready(function(){
           <td>id</td>
           <td>Date</td>
           <td>Content</td>
+          <td>Start/End question</td>
       </tr>
         {% for q in query_results %}
           <tr>
             <td>{{ q[0] }}</td>
             <td>{{ q[1] }}</td>
             <td>{{ q[2] }}</td>
+            <td>
+                {% if active_question == q[0] %}
+                    <button id="question-btn-{{q[0]}}" class="btn btn-primary end-question-btn" data-qid="{{q[0]}}" data-crn="{{CRN}}">End</button>
+                {% else %}
+                    <button id="question-btn-{{q[0]}}" class="btn btn-primary start-question-btn" data-qid="{{q[0]}}" data-crn="{{CRN}}">Start</button>
+                {% endif %}
+            </td>
           </tr>
         {% endfor %}
       </tbody>
