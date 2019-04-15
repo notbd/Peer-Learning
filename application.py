@@ -5,6 +5,7 @@ from application.forms import *
 import flask_login
 import query_parser
 import datetime
+import json
 
 # Elastic Beanstalk initalization
 application = Flask(__name__)
@@ -253,6 +254,43 @@ def instructor_session(CRN, date):
     else:
         return "Not yet implemented"
 
+# backend-only function for student to search for existing courses
+@application.route('/search-course', methods=['GET'])
+def search_course():
+    search_query = request.args.get('q')
+    if search_query == "":
+        return ""
+
+    search_query_list = search_query.split(" ")
+
+    try:
+        all_results = set()
+        for q in search_query_list:
+            results = db.session.execute(
+                'SELECT crn, title, year, term, user.name '
+                'FROM course JOIN user ON course.instructor = user.email '
+                'WHERE CRN LIKE "%{0}%" OR title LIKE "%{0}%" OR user.name LIKE "%{0}%" '
+                'OR year LIKE "%{0}%"'.format(q)).fetchall()
+            results = [tuple([val for val in r]) for r in results]
+            if len(all_results) == 0:
+                all_results.update(results)
+            else:
+                all_results.intersection_update(results)
+        db.session.close()
+        courses = []
+        for r in all_results:
+            crn, title, year, term, instructor = r
+            courses.append({
+                "CRN": crn,
+                "title": title,
+                "year": year,
+                "term": term,
+                "instructor": instructor
+            })
+        return json.dumps(courses)
+    except Exception as e:
+        return str(e)
+
 
 @application.route('/dashboard/student/<CRN>', methods=['POST'])
 def register_course(CRN):
@@ -389,7 +427,8 @@ def student_question_page(CRN):
             question = db.session.execute(
                 'SELECT q.id, q.question, q.schemas FROM question q WHERE id = %s ' % qid).fetchone()
             db.session.execute(
-                'INSERT INTO response (question_id, student, response) VALUES ("%s", "%s", "%s")' % (qid, user_id, response)
+                'INSERT INTO response (question_id, student, response) VALUES ("%s", "%s", "%s")' % (
+                    qid, user_id, response)
             )
             db.session.commit()
             db.session.close()
@@ -479,7 +518,7 @@ def query_parser_test():
             return str(e)
 
 
-# developement use only
+# development use only
 @application.route("/any-query", methods=['GET', 'POST'])
 def any_query():
     if request.method == 'GET':
