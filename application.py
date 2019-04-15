@@ -254,6 +254,7 @@ def instructor_session(CRN, date):
     else:
         return "Not yet implemented"
 
+
 # backend-only function for student to search for existing courses
 @application.route('/search-course', methods=['GET'])
 def search_course():
@@ -264,18 +265,25 @@ def search_course():
     search_query_list = search_query.split(" ")
 
     try:
+        # find all courses that match the query
         all_results = set()
         for q in search_query_list:
-            results = db.session.execute(
-                'SELECT crn, title, year, term, user.name '
-                'FROM course JOIN user ON course.instructor = user.email '
-                'WHERE CRN LIKE "%{0}%" OR title LIKE "%{0}%" OR user.name LIKE "%{0}%" '
-                'OR year LIKE "%{0}%"'.format(q)).fetchall()
+            sql_query = 'SELECT crn, title, year, term, user.name ' \
+                        'FROM course JOIN user ON course.instructor = user.email ' \
+                        'WHERE (CRN LIKE "%{0}%" OR title LIKE "%{0}%" OR user.name LIKE "%{0}%" ' \
+                        'OR year LIKE "%{0}%")'.format(q)
+            # filter out courses already registered
+            if flask_login.current_user is not None and not flask_login.current_user.is_anonymous:
+                sql_query += ' AND crn NOT IN (SELECT crn FROM take WHERE student = "{}")'.format(
+                    flask_login.current_user.email)
+
+            results = db.session.execute(sql_query).fetchall()
             results = [tuple([val for val in r]) for r in results]
             if len(all_results) == 0:
                 all_results.update(results)
             else:
                 all_results.intersection_update(results)
+
         db.session.close()
         courses = []
         for r in all_results:
@@ -289,25 +297,30 @@ def search_course():
             })
         return json.dumps(courses)
     except Exception as e:
-        return str(e)
+        return str(e)  # page for student to search and register a new course
 
 
-@application.route('/dashboard/student/<CRN>', methods=['POST'])
-def register_course(CRN):
-    try:
-        db.session.execute(
-            'INSERT INTO Take '
-            '(CRN, Student) '
-            'VALUES ("%s", "%s")' %
-            (CRN, flask_login.current_user.email))
-        db.session.commit()
-        db.session.close()
-    except Exception as e:
-        db.session.rollback()
-        return str(e)
-    return redirect(url_for('student_dashboard'))
+@application.route('/dashboard/student/add-course', methods=['GET', 'POST'])
+def search_and_register_course():
+    if request.method == 'GET':
+        return render_template("student_search_dashboard.html")
+    elif request.method == 'POST':
+        CRN = request.form['CRN']
+        try:
+            db.session.execute(
+                'INSERT INTO Take '
+                '(CRN, Student) '
+                'VALUES ("%s", "%s")' %
+                (CRN, flask_login.current_user.email))
+            db.session.commit()
+            db.session.close()
+        except Exception as e:
+            db.session.rollback()
+            return str(e)
+        return redirect(url_for('student_dashboard'))
 
 
+# TODO: move frontend of dropping course to registered course page
 @application.route('/dashboard/student/delete/<CRN>', methods=['POST'])
 def student_drop_course(CRN):
     if flask_login.current_user is None or flask_login.current_user.is_anonymous:
