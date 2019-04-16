@@ -22,6 +22,16 @@ td, th {
 </style>
 
 <script>
+
+$(document).on('click', '.registerBtn', function(){
+      var data = {
+        CRN: $(this).data("crn")
+      }
+      $.post("/dashboard/student/add-course", data, function(data, status){
+        window.location.href = "/dashboard/student/courses";
+      });
+});
+
 $(document).ready(function(){
     $( "#searchBox" ).keyup(function() {
         $.get("/search-course?q=" + $(this).val(), function(data, status) {
@@ -30,9 +40,7 @@ $(document).ready(function(){
                 return ;
             }
             var results = $.parseJSON(data);
-            console.log(results);
             for (course of results) {
-                console.log(course);
                 $('#searchResultsTable tr:first').after(
                     `<tr>
                         <td>${course['CRN']}</td>
@@ -40,7 +48,7 @@ $(document).ready(function(){
                         <td>${course['year']}</td>
                         <td>${course['term']}</td>
                         <td>${course['instructor']}</td>
-                        <td><button class='btn btn-primary'>Register</button></td>
+                        <td><button class='btn btn-primary registerBtn' data-crn="${course['CRN']}"=>Register</button></td>
                     </tr>`
                 );
             }
