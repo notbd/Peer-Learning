@@ -29,8 +29,11 @@
 
 <script>
 $(document).ready(function(){
-    $('#AddQuestionButton').click(function(){
-  		$('#AddQuestionForm').toggle(500);
+  $('#editQuestionBtn').click(function(){
+  		$('#schema').attr("contenteditable", true);
+  		$('#question').attr("contenteditable", true);
+        $(this).html("Save");
+        $(this).attr("id", "saveQuestionBtn");
   });
 
   $('#startQuestionBtn').click(function() {
@@ -56,7 +59,7 @@ $(document).ready(function(){
 <main role="main" class="inner cover">
     <!--question div-->
     <div style="background-color: #505c61; padding:10px;  overflow: hidden">
-        <button style="float:right">Edit</button>
+        <button id="editQuestionBtn" style="float:right">Edit</button>
         {% if is_active %}
         <button id="startQuestionBtn" style="float:right" disabled  data-qid="{{q.id}}" data-crn="{{q.CRN}}">Start</button>
         {% else %}
@@ -64,15 +67,16 @@ $(document).ready(function(){
         {% endif %}
         {% if q.schemas is not none %}
         <div style="color:#7a9fab;">
-            <p style="font-family:monospace">Schemas:
+            <p style="font-family:monospace">Schemas: </p>
                 <!--schemas is stored (in db) in the format of: Employee(id,name,gender,salary)|Project(id,name)-->
-                {% for schema in q.schemas.split("|") %}
-                <br>{{schema}}
-                {% endfor %}
+
+                <p id="schema" style="font-family:monospace"> {% for schema in q.schemas.split("|") %}
+                    {{schema}}<br>
+                    {% endfor %} </p>
             </p>
         </div>
         {% endif %}
-        <p>{{q.question}}</p>
+        <p id="question">{{q.question}}</p>
         <button style="float:right" onclick="window.open('/analyze-responses/{{q.id}}','_blank')">Analyze responses</button>
     </div>
 
