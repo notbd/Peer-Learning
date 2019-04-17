@@ -30,10 +30,31 @@
 <script>
 $(document).ready(function(){
   $('#editQuestionBtn').click(function(){
-  		$('#schema').attr("contenteditable", true);
-  		$('#question').attr("contenteditable", true);
-        $(this).html("Save");
-        $(this).attr("id", "saveQuestionBtn");
+        if ($(this).html() == "Save") {
+          var schemaContent = $('#schema').text();
+          var parsedSchemas = [];
+          for (var line of schemaContent.trim().split(/\n/)) {
+            var trimmed = line.trim();
+            if (trimmed.length > 0) {
+                parsedSchemas.push(trimmed);
+            }
+          }
+          var encodedSchema = parsedSchemas.join("|");
+
+          var data = {
+            schemas: encodedSchema,
+            question: $('#question').html()
+
+          }
+          $.post("/dashboard/instructor/edit-question/{{q.id}}", data, function(data, status){
+            window.location.href = "/dashboard/instructor/question/{{q.id}}";
+          });
+        } else {
+            $('#schema').attr("contenteditable", true);
+            $('#question').attr("contenteditable", true);
+            $(this).html("Save");
+        }
+
   });
 
   $('#startQuestionBtn').click(function() {
@@ -67,7 +88,7 @@ $(document).ready(function(){
         {% endif %}
         {% if q.schemas is not none %}
         <div style="color:#7a9fab;">
-            <p style="font-family:monospace">Schemas: </p>
+            <div style="font-family:monospace">Schemas: </div>
                 <!--schemas is stored (in db) in the format of: Employee(id,name,gender,salary)|Project(id,name)-->
 
                 <p id="schema" style="font-family:monospace"> {% for schema in q.schemas.split("|") %}
