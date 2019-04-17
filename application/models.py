@@ -1,6 +1,7 @@
 from application import db
 from flask_login import LoginManager, UserMixin, \
     login_required, login_user, logout_user
+from sqlalchemy.sql import func
 
 
 class Data(db.Model):
@@ -73,8 +74,16 @@ class Question(db.Model):
     question = db.Column(db.String(300))
     schemas = db.Column(db.String(1000), nullable=True)
 
+    def __init__(self, id, question, schemas, CRN=None):
+        self.id = id
+        self.question = question
+        self.schemas = schemas
+        self.CRN = CRN
+
+
 
 class Response(db.Model):
     question_id = db.Column(db.Integer, primary_key=True)
+    submission_time = db.Column(db.DateTime(timezone=True), server_default=func.now(), primary_key=True)
     student = db.Column(db.String(120), db.ForeignKey('user.email'), primary_key=True)
     response = db.Column(db.String(1000))

@@ -4,14 +4,6 @@
 {% block content %}
 
 <style>
-#AddCourseForm{
-	display: none;
-    width: 300px;
-    border: 1px solid #ccc;
-    padding: 14px;
-    background: #ececec;
-}
-
 table {
   font-family: arial, sans-serif;
   border-collapse: collapse;
@@ -25,21 +17,24 @@ td, th {
 }
 
 
+
 </style>
 
 <script>
 $(document).ready(function(){
-	$('#AddCourseBtn').click(function(){
-  		$('#AddCourseForm').toggle(500);
+	$('#addSessionBtn').click(function(){
+        var date = $('#newSession').val();
+        $(location).attr('href', '/dashboard/instructor/session/'+"{{course_CRN}}"+"/"+date);
   });
 });
+
 </script>
 
 
 <main role="main" class="inner cover">
     <h2 class="cover-heading" style="float:left">Questions for {{course_title}}</h2>
     <!--<form>-->
-        <!--<button type="submit" style="float:right" class="btn btn-secondary" formaction="/course/delete/{{course_CRN}}" formmethod="post"> Delete course </button>-->
+    <!--<button type="submit" style="float:right" class="btn btn-secondary" formaction="/course/delete/{{course_CRN}}" formmethod="post"> Delete course </button>-->
     <!--</form>-->
 
     <table>
@@ -49,19 +44,30 @@ $(document).ready(function(){
         </tr>
         {% for date, cnt in session_info %}
         <tr>
-            <td><a href="/dashboard/instructor/{{course_CRN}}/{{date[:10]}}">{{date[:10]}}</a></td>
+            <td><a href="/dashboard/instructor/session/{{course_CRN}}/{{date[:10]}}">{{date[:10]}}</a></td>
             <td>{{cnt}}</td>
         </tr>
         {% endfor %}
+        <tr>
+            <td>
+                <input id="newSession" placeholder="YYYY-MM-DD"/>
+            </td>
+            <td>
+                <button id="addSessionBtn" class="btn btn-primary">New Session</button>
+            </td>
+
+        </tr>
     </table>
+
+
 </main>
 
 <!--<div align="center">-->
 
 
-		<!--<form>-->
-        <!--<button type="submit" formaction="/dashboard/instructor/course/question/{{course_CRN}}" formmethod="get"> Questions </button>-->
-    <!--</form>-->
+<!--<form>-->
+<!--<button type="submit" formaction="/dashboard/instructor/course/question/{{course_CRN}}" formmethod="get"> Questions </button>-->
+<!--</form>-->
 <!--</div>-->
 
 {% endblock %}

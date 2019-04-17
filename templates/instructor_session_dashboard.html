@@ -1,0 +1,69 @@
+{% extends "base.html" %} {% import 'macros.html' as macros %}
+{% set nav_tabs = [("Home", "/dashboard/instructor/courses"), ("Profile", "/dashboard/instructor/profile"), ("Log out", "/logout")] %}
+{% set active_tab = "Home" %}
+{% block content %}
+
+<style>
+  #AddQuestionForm{
+  	display: none;
+      width: 300px;
+      border: 1px solid #ccc;
+      padding: 14px;
+      background: #ececec;
+  }
+  table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+  td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+  }
+
+</style>
+
+<script>
+$(document).ready(function(){
+	$('#AddQuestionButton').click(function(){
+  		$('#AddQuestionForm').toggle(500);
+  });
+});
+
+
+</script>
+
+
+<main role="main" class="inner cover">
+    <h2 class="cover-heading">Questions for {{date}}</h2>
+    {% for q in questions %}
+    <div onclick="location.href='/dashboard/instructor/question/{{q.id}}';"
+         style="cursor: pointer; background-color: #505c61; padding:10px; margin-bottom:10px;">
+        {% if q.schemas is not none %}
+        <div style="color:#7a9fab;">
+            <p style="font-family:monospace">Schemas:
+                <!--schemas is stored (in db) in the format of: Employee(id,name,gender,salary)|Project(id,name)-->
+                {% for schema in q.schemas.split("|") %}
+                <br>{{schema}}
+                {% endfor %}
+            </p>
+        </div>
+        {% endif %}
+        <p>{{q.question}}</p>
+    </div>
+    {% endfor %}
+
+    <button id="AddQuestionButton" class="btn btn-primary">Add Question</button>
+    <form id="AddQuestionForm" action="/dashboard/instructor/question/" method="post">
+        {{ add_question_form.hidden_tag() }}
+        {{ macros.render_field(add_question_form.CRN, value=CRN, label_visible=false, hidden=true) }}
+        {{ macros.render_field(add_question_form.question_date, value=date, placeholder='MM/DD/YYYY', label_visible=false, hidden=true) }}
+        {{ macros.render_field(add_question_form.schemas, placeholder='e.g. Employee(id,name,gender)|Project(id,name,budget)', label_visible=true) }}
+        {{ macros.render_field(add_question_form.question, placeholder='', label_visible=true) }}
+        <button type="submit" class="btn btn-default">Submit</button>
+    </form>
+</main>
+
+
+{% endblock %}

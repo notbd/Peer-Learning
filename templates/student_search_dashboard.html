@@ -1,8 +1,8 @@
 {% extends "base.html" %} {% import 'macros.html' as macros %}
+{% set nav_tabs = [("Home", "/dashboard/student/courses"), ("Profile", "/dashboard/student/profile"), ("Log out", "/logout")] %}
 {% block content %}
 
 <style>
-
 table {
   font-family: arial, sans-serif;
   border-collapse: collapse;
@@ -15,42 +15,67 @@ td, th {
   padding: 8px;
 }
 
+#searchResultsDiv {
+    min-height: 80%;
+}
 
 </style>
 
-<form action="/logout" method="post">
-    <button type="submit" style="float: right;">Log Out</button>
-</form>
+<script>
 
-<div class="col-md-4 col-md-offset-4">
+$(document).on('click', '.registerBtn', function(){
+      var data = {
+        CRN: $(this).data("crn")
+      }
+      $.post("/dashboard/student/add-course", data, function(data, status){
+        window.location.href = "/dashboard/student/courses";
+      });
+});
 
-      <div align="center">
-        <h2>Search Result</h2>
-      </div>
+$(document).ready(function(){
+    $( "#searchBox" ).keyup(function() {
+        $.get("/search-course?q=" + $(this).val(), function(data, status) {
+            $('#searchResultsTable').find("tr:gt(0)").remove();
+            if (data.length == 0) {
+                return ;
+            }
+            var results = $.parseJSON(data);
+            for (course of results) {
+                $('#searchResultsTable tr:first').after(
+                    `<tr>
+                        <td>${course['CRN']}</td>
+                        <td>${course['title']}</td>
+                        <td>${course['year']}</td>
+                        <td>${course['term']}</td>
+                        <td>${course['instructor']}</td>
+                        <td><button class='btn btn-primary registerBtn' data-crn="${course['CRN']}"=>Register</button></td>
+                    </tr>`
+                );
+            }
+        });
+    });
+});
 
-<hr>
 
-<ul>
-    <li>Course: {{course.title}}</li>
-    <li>Instructor: {{course.instructor}}</li>
-    <li>Year: {{course.year}}</li>
-    <li>Term: {{course.term}}</li>
-    {% if registered_flag %}
-        <li>Status: Registered</li>
-    {% else %}
-        <li>Status: Not registered</li>
-    {% endif %}
-</ul>
+</script>
 
-{% if registered_flag %}
-    <form>
-        <button type="submit" formaction="/dashboard/student/delete/{{course.CRN}}" formmethod="post"> Delete/drop </button>
-    </form>
-{% else %}
-    <form>
-        <button type="submit" formaction="/dashboard/student/{{course.CRN}}" formmethod="post"> Register </button>
-    </form>
-{% endif %}
+<main role="main" class="inner cover">
+    <input type="text" id="searchBox" placeholder="Search for course here">
+    <div id="searchResultsDiv">
+        <table id="searchResultsTable">
+            <tbody>
+            <tr>
+                <td>CRN</td>
+                <td>title</td>
+                <td>year</td>
+                <td>term</td>
+                <td>instructor</td>
+                <td>register</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
 
 </div>
 

@@ -1,0 +1,91 @@
+{% extends "base.html" %} {% import 'macros.html' as macros %}
+{% set nav_tabs = [("Home", "/dashboard/instructor/courses"), ("Profile", "/dashboard/instructor/profile"), ("Log out", "/logout")] %}
+{% set active_tab = "Home" %}
+{% block content %}
+
+<style>
+  #AddQuestionForm{
+  	display: none;
+      width: 300px;
+      border: 1px solid #ccc;
+      padding: 14px;
+      background: #ececec;
+  }
+
+  table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+  }
+
+
+</style>
+
+<script>
+$(document).ready(function(){
+    $('#AddQuestionButton').click(function(){
+  		$('#AddQuestionForm').toggle(500);
+  });
+
+  $('#startQuestionBtn').click(function() {
+    $('#startQuestionBtn').prop('disabled', true);
+    var qid = $(this).data('qid');
+    var crn = $(this).data('crn');
+    var data = {
+        crn: crn,
+        qid: qid
+    }
+    $.post("/set-active-question", data, function(data, status) {
+        console.log(`${data} and status is ${status}`)
+    });
+  });
+
+});
+
+
+
+</script>
+
+
+<main role="main" class="inner cover">
+    <!--question div-->
+    <div style="background-color: #505c61; padding:10px;  overflow: hidden">
+        <button style="float:right">Edit</button>
+        {% if is_active %}
+        <button id="startQuestionBtn" style="float:right" disabled  data-qid="{{q.id}}" data-crn="{{q.CRN}}">Start</button>
+        {% else %}
+        <button id="startQuestionBtn" style="float:right" data-qid="{{q.id}}" data-crn="{{q.CRN}}">Start</button>
+        {% endif %}
+        {% if q.schemas is not none %}
+        <div style="color:#7a9fab;">
+            <p style="font-family:monospace">Schemas:
+                <!--schemas is stored (in db) in the format of: Employee(id,name,gender,salary)|Project(id,name)-->
+                {% for schema in q.schemas.split("|") %}
+                <br>{{schema}}
+                {% endfor %}
+            </p>
+        </div>
+        {% endif %}
+        <p>{{q.question}}</p>
+        <button style="float:right" onclick="window.open('/analyze-responses/{{q.id}}','_blank')">Analyze responses</button>
+    </div>
+
+
+
+    <!--response divs-->
+    {% for student, response in responses %}
+    <div style="background-color: #7a9ba9; padding:10px; margin-top:10px;">
+        <p style="text-align:right;  color:#324b54; text-shadow:none;">{{student}}</p>
+        <p style="font-family:monospace;">{{response}}</p>
+    </div>
+    {% endfor %}
+</main>
+
+
+{% endblock %}
