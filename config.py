@@ -10,6 +10,6 @@
 SQLALCHEMY_DATABASE_URI = 'sqlite:///test.db'
 
 SQLALCHEMY_POOL_RECYCLE = 3600
-
+SQLALCHEMY_TRACK_MODIFICATIONS = False
 WTF_CSRF_ENABLED = True
-SECRET_KEY = 'dsaf0897sfdg45sfdgfdsaqzdf98sdf0a'
+# SECRET_KEY = 'dsaf0897sfdg45sfdgfdsaqzdf98sdf0a'

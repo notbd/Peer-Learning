@@ -8,9 +8,12 @@ import datetime
 
 # Elastic Beanstalk initalization
 application = Flask(__name__)
-application.debug = True
+db.init_app(application)
+
+# application.debug = True
 # change this to your own value
 application.secret_key = 'cC1YCIWOj9GgWspgNEo2'
+application.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 login_manager = flask_login.LoginManager()
 login_manager.init_app(application)
@@ -468,8 +471,8 @@ def any_query():
             return str(e)
 
 
-def test():
-    return render_template('test.html')
+# def test():
+#     return render_template('test.html')
 
 
 if __name__ == '__main__':

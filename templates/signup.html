@@ -4,6 +4,7 @@
 <main role="main" class="inner cover">
 
   <h1 class="cover-heading">Sign Up</h1>
+
   <hr>
 
   <form method="post" action="/signup" id="db_post" name="db_post">
@@ -14,9 +15,13 @@
 
     {{ macros.render_field(form.name, placeholder='Please enter your full name', type='name', label_visible=true) }}
 
+    <br>
+
     {{ macros.render_field(form.email, placeholder='example@illinois.edu', type='email', label_visible=true, small_text='This will become your future login credential.') }}
 
     {{ macros.render_field(form.password, placeholder='Your password here', type='password', label_visible=true, small_text='Think twice - you cannot recover your password.') }}
+
+    <br>
 
     <button type="submit" class="btn btn-primary">Sign Up</button>
 
