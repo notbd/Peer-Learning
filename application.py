@@ -162,10 +162,26 @@ def instructor_course_dashboard(CRN):
         return str(e)
 
 
-# backend-only function for an instructor to delete a course
 @application.route('/course/delete/<CRN>', methods=['POST'])
 def delete_course(CRN):
     # TODO: authenticate user permission
+    if flask_login.current_user is None or flask_login.current_user.is_anonymous:
+        return redirect(url_for('login'))
+
+    if flask_login.current_user.user_type == STUDENT:
+        return redirect(url_for('student_dashboard'))
+
+    fetched_course = None
+    try:
+        fetched_course = db.session.execute('SELECT * FROM course '
+                                            'WHERE CRN="%s" AND instructor="%s"' %
+                                            (CRN, flask_login.current_user.email)).fetchone()
+        db.session.close()
+    except Exception as e:
+        db.session.rollback()
+        return str(e)
+    if fetched_course == None:
+        return redirect(url_for('instructor_dashboard'))
     try:
         db.session.execute(
             'DELETE FROM course '
@@ -342,7 +358,6 @@ def search_and_register_course():
         return redirect(url_for('student_dashboard'))
 
 
-# TODO: move frontend of dropping course to registered course page
 @application.route('/dashboard/student/delete/<CRN>', methods=['POST'])
 def student_drop_course(CRN):
     if flask_login.current_user is None or flask_login.current_user.is_anonymous:
