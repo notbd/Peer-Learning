@@ -49,6 +49,7 @@ $(document).ready(function(){
             <th scope="col">Title</th>
             <th scope="col">Year</th>
             <th scope="col">Term</th>
+            <th scope="col">Chatroom</th>
           </tr>
         </thead>
         <tbody>
@@ -58,6 +59,7 @@ $(document).ready(function(){
                   <td><a href="/dashboard/instructor/course/{{c.CRN}}">{{ c.title }}</a></td>
                 <td>{{ c.year }}</td>
                 <td>{{ c.term }}</td>
+                <td><button onclick="window.open('/chatroom/{{c.CRN}}','_blank')">Enter chatroom</button></td>
               </tr>
             {% endfor %}
         </tbody>
