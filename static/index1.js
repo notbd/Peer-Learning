@@ -19,8 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
 
     // Get existing display name from local storage and display on site
-    var username = localStorage.getItem('display_name');
-    document.querySelector('#user').innerHTML = username;
+//    var username = localStorage.getItem('display_name');
+//    document.querySelector('#user').innerHTML = username;
 
     var current_channel = localStorage.getItem('current_channel');
     const channel_to_display = template_title({'channel_to_display': current_channel});

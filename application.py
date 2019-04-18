@@ -579,12 +579,6 @@ def any_query():
             return str(e)
 
 
-# def test():
-#     return render_template('test.html')
-
-
-
-
 socketio = SocketIO(application)
 channel_list = {"general": []}
 present_channel = {"initial": "general"}
@@ -594,12 +588,12 @@ present_channel = {"initial": "general"}
 def index1():
     if request.method == "GET":
         # Pass channel list to, and use jinja to display already created channels
-        return render_template("index1.html", channel_list=channel_list)
+        return render_template("index1.html", channel_list=channel_list, user=flask_login.current_user.name)
 
     elif request.method == "POST":
         print "[INFO] POST request on /chatroom", request.form
         channel = request.form.get("channel_name")
-        user = "wtf"
+        user = flask_login.current_user.email
 
         # Adding a new channel
         if channel and (channel not in channel_list):
