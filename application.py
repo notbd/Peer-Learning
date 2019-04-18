@@ -11,7 +11,7 @@ import json
 application = Flask(__name__)
 db.init_app(application)
 
-# application.debug = True
+application.debug = True
 # change this to your own value
 application.secret_key = 'cC1YCIWOj9GgWspgNEo2'
 application.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -228,6 +228,17 @@ def instructor_question(qid=None):
             # TODO: render form with error msg
             return str(e)
         return redirect(url_for('instructor_session', CRN=crn, date=date))
+
+
+@application.route('/dashboard/instructor/edit-question/<qid>', methods=['POST'])
+def instructor_edit_question(qid):
+    db.session.execute('UPDATE Question '
+                       'SET schemas = :schemas, question = :question '
+                       'WHERE id = :qid',
+                       {'qid': qid, 'schemas': request.form["schemas"], 'question': request.form["question"]})
+    db.session.commit()
+    db.session.close()
+    return "updated question"
 
 
 # page where instructor can manage the questions for a single session
