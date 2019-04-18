@@ -1,5 +1,5 @@
 {% extends "base.html" %} {% import 'macros.html' as macros %}
-{% set nav_tabs = [("Home", "/dashboard/student/courses"), ("Profile", "/dashboard/student/profile"), ("Log out", "/logout")] %}
+{% set nav_tabs = [("Home", "/dashboard/student/courses"), ("Profile", "/dashboard/student/profile"), ("Sign Out", "/logout")] %}
 {% set active_tab = "Home" %}
 {% block content %}
 
@@ -22,8 +22,9 @@
 </style>
 
 <main role="main" class="inner cover">
+  
   <div class="container-fluid">
-    
+
     <h1 class="cover-heading">Question</h1>
     <br>
 

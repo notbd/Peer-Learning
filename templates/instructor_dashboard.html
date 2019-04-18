@@ -8,8 +8,8 @@
   #AddCourseForm {
     display: none;
     width: 100%;
-    height: 50%;
-    border: 0px solid #fff;
+    /* height: 50%; */
+    border: 0px;
     padding: 5px;
     background: #333;
   }
@@ -100,6 +100,7 @@
     <button id="AddCourseBtn" class="btn btn-info">Add Course</button>
     <br>
     <form id="AddCourseForm" action="/dashboard/instructor/courses" method="post">
+      
       {{ add_course_form.hidden_tag() }}
       {{ macros.render_field(add_course_form.CRN, placeholder='24521', label_visible=true) }}
       {{ macros.render_field(add_course_form.title, placeholder='CS 411', label_visible=true) }}

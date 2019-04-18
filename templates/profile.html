@@ -2,12 +2,16 @@
 {% set nav_tabs = [("Home", "/dashboard/instructor/courses"), ("Profile", "/dashboard/instructor/profile"), ("Sign Out", "/logout")] %}
 {% set active_tab = "Profile" %}
 {% block content %}
+
+<!-- CSS -->
 <style>
     .jumbotron {
         background: #444;
         text-shadow: none;
     }
 </style>
+
+<!-- Profile -->
 <main role="main" class="inner cover">
     <div class="jumbotron">
         <h1 class="display-4">{{user.name}}</h1>
