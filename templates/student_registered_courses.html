@@ -73,6 +73,7 @@
           <th scope="col">Term</th>
           <th scope="col">Instructor</th>
           <th scope="col">Chatroom</th>
+          <th scope="col">Drop course</th>
         </tr>
       </thead>
       <tbody>
@@ -85,6 +86,11 @@
           <td>{{ c.instructor }}</td>
           <td><button class="btn btn-warning" onclick="window.open('/chatroom/{{c.CRN}}','_blank')">Enter
               chatroom</button></td>
+          <td>
+              <form action="/dashboard/student/delete/{{c.CRN}}" method="post">
+                  <button class="btn btn-warning" name="forwardBtn" type="submit">Drop course</button>
+              </form>
+    			</td>
         </tr>
         {% endfor %}
       </tbody>

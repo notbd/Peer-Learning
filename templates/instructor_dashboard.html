@@ -80,6 +80,7 @@
           <th scope="col">Year</th>
           <th scope="col">Term</th>
           <th scope="col">Chatroom</th>
+					<th scope="col">Delete course</th>
         </tr>
       </thead>
       <tbody>
@@ -91,6 +92,11 @@
           <td>{{ c.term }}</td>
           <td><button class="btn btn-warning" onclick="window.open('/chatroom/{{c.CRN}}','_blank')">Enter
               chatroom</button></td>
+					<td>
+							<form action="/course/delete/{{c.CRN}}" method="post">
+		    					<button class="btn btn-warning" name="forwardBtn" type="submit">Delete course</button>
+							</form>
+					</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -100,7 +106,7 @@
     <button id="AddCourseBtn" class="btn btn-info">Add Course</button>
     <br>
     <form id="AddCourseForm" action="/dashboard/instructor/courses" method="post">
-      
+
       {{ add_course_form.hidden_tag() }}
       {{ macros.render_field(add_course_form.CRN, placeholder='24521', label_visible=true) }}
       {{ macros.render_field(add_course_form.title, placeholder='CS 411', label_visible=true) }}
