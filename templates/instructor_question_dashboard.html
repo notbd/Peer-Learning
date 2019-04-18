@@ -90,7 +90,6 @@ $(document).ready(function(){
         <div style="color:#7a9fab;">
             <div style="font-family:monospace">Schemas: </div>
                 <!--schemas is stored (in db) in the format of: Employee(id,name,gender,salary)|Project(id,name)-->
-
                 <p id="schema" style="font-family:monospace"> {% for schema in q.schemas.split("|") %}
                     {{schema}}<br>
                     {% endfor %} </p>
