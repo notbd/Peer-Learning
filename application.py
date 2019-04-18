@@ -583,7 +583,7 @@ def any_query():
 
 
 socketio = SocketIO(application)
-channel_list_by_course = defaultdict(dict)
+channel_list_by_course = defaultdict(lambda: {"general": []})
 present_channel = {"initial": "general"}
 
 
@@ -623,6 +623,7 @@ def index1(CRN):
 @socketio.on("create channel")
 def create_channel(new_channel):
     emit("new channel", new_channel, broadcast=True)
+
 
 @socketio.on("send message")
 def send_message(message_data):
