@@ -73,7 +73,7 @@
           <th scope="col">Term</th>
           <th scope="col">Instructor</th>
           <th scope="col">Chatroom</th>
-          <th scope="col">Drop course</th>
+          <th scope="col">Drop Course</th>
         </tr>
       </thead>
       <tbody>
@@ -84,11 +84,10 @@
           <td>{{ c.year }}</td>
           <td>{{ c.term }}</td>
           <td>{{ c.instructor }}</td>
-          <td><button class="btn btn-warning" onclick="window.open('/chatroom/{{c.CRN}}','_blank')">Enter
-              chatroom</button></td>
+          <td><button class="btn btn-warning btn-sm" onclick="window.open('/chatroom/{{c.CRN}}','_blank')">enter</button></td>
           <td>
               <form action="/dashboard/student/delete/{{c.CRN}}" method="post">
-                  <button class="btn btn-warning" name="forwardBtn" type="submit">Drop course</button>
+                  <button class="btn btn-danger btn-sm" name="forwardBtn" type="submit">drop</button>
               </form>
     			</td>
         </tr>
