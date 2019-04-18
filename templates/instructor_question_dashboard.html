@@ -29,21 +29,55 @@
 
 <script>
 $(document).ready(function(){
-    $('#AddQuestionButton').click(function(){
-  		$('#AddQuestionForm').toggle(500);
+  $('#editQuestionBtn').click(function(){
+        if ($(this).html() == "Save") {
+          var schemaContent = $('#schema').text();
+          var parsedSchemas = [];
+          for (var line of schemaContent.trim().split(/\n/)) {
+            var trimmed = line.trim();
+            if (trimmed.length > 0) {
+                parsedSchemas.push(trimmed);
+            }
+          }
+          var encodedSchema = parsedSchemas.join("|");
+
+          var data = {
+            schemas: encodedSchema,
+            question: $('#question').html()
+
+          }
+          $.post("/dashboard/instructor/edit-question/{{q.id}}", data, function(data, status){
+            window.location.href = "/dashboard/instructor/question/{{q.id}}";
+          });
+        } else {
+            $('#schema').attr("contenteditable", true);
+            $('#question').attr("contenteditable", true);
+            $(this).html("Save");
+        }
+
   });
 
   $('#startQuestionBtn').click(function() {
-    $('#startQuestionBtn').prop('disabled', true);
-    var qid = $(this).data('qid');
-    var crn = $(this).data('crn');
-    var data = {
-        crn: crn,
-        qid: qid
+    if ($(this).html() == "Start") {
+        $(this).html('End');
+        var data = {
+            crn: $(this).data('crn'),
+            qid: $(this).data('qid')
+        }
+        $.post("/set-active-question", data, function(data, status) {
+            console.log(`${data} and status is ${status}`)
+        });
+    } else {
+        $(this).html('Start');
+        var data = {
+            crn: $(this).data('crn'),
+            qid: "null",
+        }
+        $.post("/set-active-question", data, function(data, status) {
+            console.log(`${data} and status is ${status}`)
+        });
+
     }
-    $.post("/set-active-question", data, function(data, status) {
-        console.log(`${data} and status is ${status}`)
-    });
   });
 
 });
@@ -56,23 +90,21 @@ $(document).ready(function(){
 <main role="main" class="inner cover">
     <!--question div-->
     <div style="background-color: #505c61; padding:10px;  overflow: hidden">
-        <button style="float:right">Edit</button>
-        {% if is_active %}
-        <button id="startQuestionBtn" style="float:right" disabled  data-qid="{{q.id}}" data-crn="{{q.CRN}}">Start</button>
-        {% else %}
-        <button id="startQuestionBtn" style="float:right" data-qid="{{q.id}}" data-crn="{{q.CRN}}">Start</button>
-        {% endif %}
+        <button id="editQuestionBtn" style="float:right">Edit</button>
+        <button id="startQuestionBtn" style="float:right" data-qid="{{q.id}}" data-crn="{{q.CRN}}">
+        {% if is_active %} End {% else %} Start {% endif %}
+        </button>
         {% if q.schemas is not none %}
         <div style="color:#7a9fab;">
-            <p style="font-family:monospace">Schemas:
+            <div style="font-family:monospace">Schemas: </div>
                 <!--schemas is stored (in db) in the format of: Employee(id,name,gender,salary)|Project(id,name)-->
-                {% for schema in q.schemas.split("|") %}
-                <br>{{schema}}
-                {% endfor %}
+                <p id="schema" style="font-family:monospace"> {% for schema in q.schemas.split("|") %}
+                    {{schema}}<br>
+                    {% endfor %} </p>
             </p>
         </div>
         {% endif %}
-        <p>{{q.question}}</p>
+        <p id="question">{{q.question}}</p>
         <button style="float:right" onclick="window.open('/analyze-responses/{{q.id}}','_blank')">Analyze responses</button>
     </div>
 

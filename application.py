@@ -5,12 +5,16 @@ from application.forms import *
 import flask_login
 import query_parser
 import datetime
+import json
 
 # Elastic Beanstalk initalization
 application = Flask(__name__)
+db.init_app(application)
+
 application.debug = True
 # change this to your own value
 application.secret_key = 'cC1YCIWOj9GgWspgNEo2'
+application.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 login_manager = flask_login.LoginManager()
 login_manager.init_app(application)
@@ -169,7 +173,6 @@ def delete_course(CRN):
 # backend-only function for an instructor to set a question as the "active" question of a course
 @application.route('/set-active-question', methods=['POST'])
 def set_active_question():
-    print(request.form)
     try:
         db.session.execute(
             'UPDATE course '
@@ -227,6 +230,17 @@ def instructor_question(qid=None):
         return redirect(url_for('instructor_session', CRN=crn, date=date))
 
 
+@application.route('/dashboard/instructor/edit-question/<qid>', methods=['POST'])
+def instructor_edit_question(qid):
+    db.session.execute('UPDATE Question '
+                       'SET schemas = :schemas, question = :question '
+                       'WHERE id = :qid',
+                       {'qid': qid, 'schemas': request.form["schemas"], 'question': request.form["question"]})
+    db.session.commit()
+    db.session.close()
+    return "updated question"
+
+
 # page where instructor can manage the questions for a single session
 @application.route('/dashboard/instructor/session/<CRN>/<date>', methods=['GET', 'POST'])
 def instructor_session(CRN, date):
@@ -254,22 +268,72 @@ def instructor_session(CRN, date):
         return "Not yet implemented"
 
 
-@application.route('/dashboard/student/<CRN>', methods=['POST'])
-def register_course(CRN):
+# backend-only function for student to search for existing courses
+@application.route('/search-course', methods=['GET'])
+def search_course():
+    search_query = request.args.get('q')
+    if search_query == "":
+        return ""
+
+    search_query_list = search_query.split(" ")
+
     try:
-        db.session.execute(
-            'INSERT INTO Take '
-            '(CRN, Student) '
-            'VALUES ("%s", "%s")' %
-            (CRN, flask_login.current_user.email))
-        db.session.commit()
+        # find all courses that match the query
+        all_results = set()
+        for q in search_query_list:
+            sql_query = 'SELECT crn, title, year, term, user.name ' \
+                        'FROM course JOIN user ON course.instructor = user.email ' \
+                        'WHERE (CRN LIKE "%{0}%" OR title LIKE "%{0}%" OR user.name LIKE "%{0}%" ' \
+                        'OR year LIKE "%{0}%")'.format(q)
+            # filter out courses already registered
+            if flask_login.current_user is not None and not flask_login.current_user.is_anonymous:
+                sql_query += ' AND crn NOT IN (SELECT crn FROM take WHERE student = "{}")'.format(
+                    flask_login.current_user.email)
+
+            results = db.session.execute(sql_query).fetchall()
+            results = [tuple([val for val in r]) for r in results]
+            if len(all_results) == 0:
+                all_results.update(results)
+            else:
+                all_results.intersection_update(results)
+
         db.session.close()
+        courses = []
+        for r in all_results:
+            crn, title, year, term, instructor = r
+            courses.append({
+                "CRN": crn,
+                "title": title,
+                "year": year,
+                "term": term,
+                "instructor": instructor
+            })
+        return json.dumps(courses)
     except Exception as e:
-        db.session.rollback()
-        return str(e)
-    return redirect(url_for('student_dashboard'))
+        return str(e)  # page for student to search and register a new course
 
 
+@application.route('/dashboard/student/add-course', methods=['GET', 'POST'])
+def search_and_register_course():
+    if request.method == 'GET':
+        return render_template("student_search_dashboard.html")
+    elif request.method == 'POST':
+        CRN = request.form['CRN']
+        try:
+            db.session.execute(
+                'INSERT INTO Take '
+                '(CRN, Student) '
+                'VALUES ("%s", "%s")' %
+                (CRN, flask_login.current_user.email))
+            db.session.commit()
+            db.session.close()
+        except Exception as e:
+            db.session.rollback()
+            return str(e)
+        return redirect(url_for('student_dashboard'))
+
+
+# TODO: move frontend of dropping course to registered course page
 @application.route('/dashboard/student/delete/<CRN>', methods=['POST'])
 def student_drop_course(CRN):
     if flask_login.current_user is None or flask_login.current_user.is_anonymous:
@@ -290,7 +354,7 @@ def student_drop_course(CRN):
 
 
 @application.route('/dashboard/student/courses', methods=['GET'])
-def find_registered_courses():
+def student_dashboard():
     if request.method == 'GET':
         try:
             # fetched_course = db.session.execute(
@@ -317,48 +381,48 @@ def find_registered_courses():
     return render_template('student_dashboard.html', current_user=flask_login.current_user)
 
 
-@application.route('/dashboard/student', methods=['GET', 'POST'])
-def student_dashboard():
-    if flask_login.current_user is None or flask_login.current_user.is_anonymous:
-        return redirect(url_for('login'))
-    if flask_login.current_user.user_type == INSTRUCTOR:
-        return redirect(url_for('instructor_dashboard'))
-
-    form2 = StudentSearchForm(request.form)
-    if request.method == 'POST' and form2.validate():
-        try:
-            CRN = int(form2.CRN.data)
-            fetched_course = db.session.execute(
-                'SELECT * FROM course '
-                'WHERE CRN="%s"' % CRN).fetchone()
-            if fetched_course is None:
-                db.session.close()
-                # output error message
-                return "<h1>The CRN you entered does not exist. Please go back to previous page and re-enter the CRN.</h1>"
-            else:
-                course = Course(CRN=fetched_course.CRN, title=fetched_course.title, year=fetched_course.year,
-                                term=fetched_course.term, instructor=fetched_course.instructor)
-                db.session.close()
-                registered_flag = False
-                # registered_flag: True if a student has already registered certain course
-                try:
-                    possible_redundancy = db.session.execute(
-                        'SELECT * '
-                        'FROM Take '
-                        'WHERE student="%s" AND CRN = "%s"' %
-                        (flask_login.current_user.email, CRN)).fetchone()
-                    db.session.close()
-                    if possible_redundancy is not None:
-                        registered_flag = True
-                except Exception as e:
-                    db.session.rollback()
-                    return str(e)
-                return render_template("student_search_dashboard.html", current_user=flask_login.current_user,
-                                       course=course, registered_flag=registered_flag)
-        except Exception as e:
-            db.session.rollback()
-            return str(e)
-    return render_template('student_dashboard.html', current_user=flask_login.current_user, form2=form2)
+# @application.route('/dashboard/student', methods=['GET', 'POST'])
+# def student_dashboard():
+#     if flask_login.current_user is None or flask_login.current_user.is_anonymous:
+#         return redirect(url_for('login'))
+#     if flask_login.current_user.user_type == INSTRUCTOR:
+#         return redirect(url_for('instructor_dashboard'))
+#
+#     form2 = StudentSearchForm(request.form)
+#     if request.method == 'POST' and form2.validate():
+#         try:
+#             CRN = int(form2.CRN.data)
+#             fetched_course = db.session.execute(
+#                 'SELECT * FROM course '
+#                 'WHERE CRN="%s"' % CRN).fetchone()
+#             if fetched_course is None:
+#                 db.session.close()
+#                 # output error message
+#                 return "<h1>The CRN you entered does not exist. Please go back to previous page and re-enter the CRN.</h1>"
+#             else:
+#                 course = Course(CRN=fetched_course.CRN, title=fetched_course.title, year=fetched_course.year,
+#                                 term=fetched_course.term, instructor=fetched_course.instructor)
+#                 db.session.close()
+#                 registered_flag = False
+#                 # registered_flag: True if a student has already registered certain course
+#                 try:
+#                     possible_redundancy = db.session.execute(
+#                         'SELECT * '
+#                         'FROM Take '
+#                         'WHERE student="%s" AND CRN = "%s"' %
+#                         (flask_login.current_user.email, CRN)).fetchone()
+#                     db.session.close()
+#                     if possible_redundancy is not None:
+#                         registered_flag = True
+#                 except Exception as e:
+#                     db.session.rollback()
+#                     return str(e)
+#                 return render_template("student_search_dashboard.html", current_user=flask_login.current_user,
+#                                        course=course, registered_flag=registered_flag)
+#         except Exception as e:
+#             db.session.rollback()
+#             return str(e)
+#     return render_template('student_dashboard.html', current_user=flask_login.current_user, form2=form2)
 
 
 @application.route('/dashboard/student/course/<CRN>', methods=['GET', 'POST'])
@@ -389,7 +453,8 @@ def student_question_page(CRN):
             question = db.session.execute(
                 'SELECT q.id, q.question, q.schemas FROM question q WHERE id = %s ' % qid).fetchone()
             db.session.execute(
-                'INSERT INTO response (question_id, student, response) VALUES ("%s", "%s", "%s")' % (qid, user_id, response)
+                'INSERT INTO response (question_id, student, response) VALUES ("%s", "%s", "%s")' % (
+                    qid, user_id, response)
             )
             db.session.commit()
             db.session.close()
@@ -399,24 +464,33 @@ def student_question_page(CRN):
             return str(e)
 
 
-@application.route('/dashboard/student/profile')
-@application.route('/dashboard/instructor/profile')
+@application.route('/dashboard/student/profile', methods=['GET','POST'])
+@application.route('/dashboard/instructor/profile', methods=['GET','POST'])
 def profile():
-    return render_template('profile.html', user=flask_login.current_user)
+    update_profile_form = UserProfileForm(request.form)
 
+    if request.method == 'POST':
+        if not update_profile_form.validate():
+            return str(update_profile_form.errors)
+        try:
+            db.session.execute('UPDATE user SET name = "%s",email = "%s" WHERE email = "%s"' %
+                               (update_profile_form.name.data, update_profile_form.email.data, flask_login.current_user.email))
+            db.session.commit()
+            db.session.close()
+        except Exception as e:
+            db.session.rollback()
+            return str(e)
 
-@application.route('/updateaction/', methods=['POST'])
-def updateaction():
-    params = request.args if request.method == 'GET' else request.form
-    newname = params.get('name')
-    try:
-        db.session.execute('UPDATE user SET name = "%s" WHERE email = "%s"' % (newname, flask_login.current_user.email))
-        db.session.commit()
-        db.session.close()
-    except Exception as e:
-        db.session.rollback()
-        return str(e)
-    return redirect(url_for('student_dashboard'))
+        try:
+            queried_user = db.session.execute('SELECT * FROM user WHERE email = "%s"' % update_profile_form.email.data).fetchone()
+            flask_login.login_user(
+                user_from_query_result(queried_user))
+            redirect_endpoint = "instructor_dashboard" if queried_user.user_type == INSTRUCTOR else "student_dashboard"
+            db.session.close()
+            return redirect(url_for(redirect_endpoint))
+        except Exception as e:
+            return str(e)
+    return render_template('profile.html', user=flask_login.current_user, update_profile_form = update_profile_form)
 
 
 @login_manager.user_loader
@@ -479,7 +553,7 @@ def query_parser_test():
             return str(e)
 
 
-# developement use only
+# development use only
 @application.route("/any-query", methods=['GET', 'POST'])
 def any_query():
     if request.method == 'GET':
@@ -500,8 +574,8 @@ def any_query():
             return str(e)
 
 
-def test():
-    return render_template('test.html')
+# def test():
+#     return render_template('test.html')
 
 
 if __name__ == '__main__':
