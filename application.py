@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from application import db
 from flask_socketio import SocketIO, emit, join_room, leave_room
@@ -18,6 +20,7 @@ application.debug = True
 # change this to your own value
 application.secret_key = 'cC1YCIWOj9GgWspgNEo2'
 application.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+application.config["CACHE_TYPE"] = "null"
 
 login_manager = flask_login.LoginManager()
 login_manager.init_app(application)
@@ -580,15 +583,18 @@ def any_query():
 
 
 socketio = SocketIO(application)
-channel_list = {"general": []}
+channel_list_by_course = defaultdict(dict)
 present_channel = {"initial": "general"}
 
 
-@application.route('/chatroom', methods=["POST", "GET"])
-def index1():
+@application.route('/chatroom/<CRN>', methods=["POST", "GET"])
+def index1(CRN):
+    channel_list = channel_list_by_course[CRN]
+    print channel_list_by_course
     if request.method == "GET":
         # Pass channel list to, and use jinja to display already created channels
-        return render_template("index1.html", channel_list=channel_list, user=flask_login.current_user.name)
+        # crn = request.args.get('crn')
+        return render_template("index1.html", channel_list=channel_list, user=flask_login.current_user.name, crn=CRN)
 
     elif request.method == "POST":
         print "[INFO] POST request on /chatroom", request.form
@@ -623,26 +629,27 @@ def send_message(message_data):
     message_data["user"] = "{} ({})".format(flask_login.current_user.name, flask_login.current_user.email)
     # print "[message_data]", message_data    #  e.g. {u'message_content': u'hello', u'timestamp': u'4/18/2019, 7:39:26 AM', u'current_channel': u'general', u'user': 'Abdu (abdu@illinois.edu)'}
     channel = message_data["current_channel"]
-    channel_message_count = len(channel_list[channel])
-    del message_data["current_channel"]
-    channel_list[channel].append(message_data)
+    crn = message_data["crn"]
+    channel_message_count = len(channel_list_by_course[crn][channel])
+    # del message_data["current_channel"]
+    channel_list_by_course[crn][channel].append(message_data)
     message_data["deleted_message"] = False
     if (channel_message_count >= 100):
-        del channel_list[channel][0]
+        del channel_list_by_course[crn][channel][0]
         message_data["deleted_message"] = True
-    emit("recieve message", message_data, broadcast=True, room=channel)
+    emit("receive message", message_data, broadcast=True, room=channel)
 
 
-@socketio.on("delete channel")
-def delete_channel(message_data):
-    channel = message_data["current_channel"]
-    user = message_data["user"]
-    present_channel[user] = "general"
-    del message_data["current_channel"]
-    del channel_list[channel]
-    channel_list["general"].append(message_data)
-    message_data = {"data": channel_list["general"], "deleted_channel": channel}
-    emit("announce channel deletion", message_data, broadcast=True)
+# @socketio.on("delete channel")
+# def delete_channel(message_data):
+#     channel = message_data["current_channel"]
+#     user = message_data["user"]
+#     present_channel[user] = "general"
+#     del message_data["current_channel"]
+#     del channel_list[channel]
+#     channel_list["general"].append(message_data)
+#     message_data = {"data": channel_list["general"], "deleted_channel": channel}
+#     emit("announce channel deletion", message_data, broadcast=True)
 
 
 @socketio.on("leave")

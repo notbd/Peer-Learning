@@ -8,7 +8,16 @@ if (!localStorage.getItem('display_name') && !localStorage.getItem('current_chan
     localStorage.setItem('comment_stack', JSON.stringify({'general': 110}));
 }
 
+function getCurrentCrn() {
+    var crn = document.getElementById('crn').textContent;
+    if (crn!=previousCrn) {
+        previousCrn = crn;
+        localStorage.setItem('current_channel', 'general');
+    }
+    return crn;
+}
 
+var previousCrn = "default";
 const template = Handlebars.compile(document.querySelector('#load-messages').innerHTML);
 const template_title = Handlebars.compile(document.querySelector('#load-channel-title').innerHTML);
 
@@ -39,7 +48,11 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('#comment-list').innerHTML += comment;
         }
         let comment_stack = JSON.parse(localStorage.getItem('comment_stack'));
-        document.querySelector('#comment-list').style.paddingTop = `${comment_stack[current_channel]}%`;
+        let crn = getCurrentCrn();
+        if (!(crn in comment_stack)) {
+            comment_stack[crn] = {'general': 110};
+        }
+        document.querySelector('#comment-list').style.paddingTop = `${comment_stack[crn][current_channel]}%`;
         var comment_count = document.querySelector('#comment-list').childElementCount;
         if (comment_count > 0) {
             document.querySelector('#comment-list').lastElementChild.scrollIntoView();
@@ -88,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Generate message view with data from server for user switching to a new channel
             const request = new XMLHttpRequest();
-            request.open('POST', '/chatroom');
+            request.open('POST', '/chatroom/'+getCurrentCrn());
             request.onload = asynch_load_messages.bind(null, request, refresh=false);
             const data = new FormData();
             data.append('channel_name', localStorage.getItem('current_channel'));
@@ -118,11 +131,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Generate message view for user with data from server
     const request = new XMLHttpRequest();
-    request.open('POST', '/chatroom');
+    request.open('POST', '/chatroom/'+getCurrentCrn());;
     request.onload = asynch_load_messages.bind(null, request, refresh=true);
     const data = new FormData();
     data.append('username', username);
-    data.append('channel_name', current_channel);
+    data.append('channel_name', localStorage.getItem('current_channel'));
     request.send(data);
 
     // When connected to socket, configure send message button, and emit message_data to FLASK server
@@ -149,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
            {
                user = "mod";
                message_content = `mod has deleted channel ${current_channel}`;
-               let message_data = {"message_content": message_content, "timestamp": timestamp, "user":user, "current_channel": current_channel };
+               let message_data = {"crn": getCurrentCrn(), "message_content": message_content, "timestamp": timestamp, "user":user, "current_channel": current_channel };
 
                console.log(message_data);
                document.querySelector('#message-input').value = '';
@@ -163,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
                if(user == 'superuser') {
                    user = 'mod';
                }
-               let message_data = {"message_content": message_content, "timestamp": timestamp, "user":user, "current_channel": current_channel };
+               let message_data = {"crn": getCurrentCrn(), "message_content": message_content, "timestamp": timestamp, "user":user, "current_channel": current_channel };
                console.log(message_data);
                document.querySelector('#message-input').value = '';
                socket.emit('send message', message_data);
@@ -176,7 +189,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // When a message is broadcast to a channel, recieve the message, and add it to the message view
-    socket.on('recieve message', message_data => {
+    socket.on('receive message', message_data => {
+    // NOTE: current_channel is not set properly when switching channels
+        if (message_data["crn"]!= getCurrentCrn()) { // || message_data["current_channel"]!=current_channel) {
+            console.log("message is not for current course or channel.", getCurrentCrn(), current_channel);
+            console.log(message_data);
+
+            return;
+        }
+
         // Create a comment element and add to message view
 
         const li = document.createElement('li');
@@ -209,10 +230,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('#comment-list').append(li);
         if(!message_data['deleted_message']) {
             let comment_stack = JSON.parse(localStorage.getItem('comment_stack'));
+            let crn = getCurrentCrn();
+            if (!(crn in comment_stack)) {
+                comment_stack[crn] = {'general': 110};
+            }
             let current_channel = localStorage.getItem('current_channel');
-            comment_stack[current_channel] -= 10;
+            comment_stack[crn][current_channel] -= 10;
             localStorage.setItem('comment_stack', JSON.stringify(comment_stack));
-            document.querySelector('#comment-list').style.paddingTop = `${comment_stack[current_channel]}%`;
+            document.querySelector('#comment-list').style.paddingTop = `${comment_stack[getCurrentCrn()][current_channel]}%`;
         }
         li.scrollIntoView();
     });
@@ -227,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('#channel-title').remove();
 
         var comment_stack = JSON.parse(localStorage.getItem('comment_stack'));
-        delete comment_stack[deleted_channel];
+        delete comment_stack[getCurrentCrn()][deleted_channel];
         localStorage.setItem('comment_stack', JSON.stringify(comment_stack));
         document.querySelectorAll('#submit-switch-channel').forEach(button => {
             if(button.value == deleted_channel) {
@@ -255,7 +280,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const comment = template({'comment': data[i]});
             document.querySelector('#comment-list').innerHTML += comment;
         }
-        document.querySelector('#comment-list').style.paddingTop = `${comment_stack[localStorage.getItem('current_channel')]}%`;
+        let crn = getCurrentCrn();
+        if (!(crn in comment_stack)) {
+            comment_stack[crn] = {'general': 110};
+        }
+        document.querySelector('#comment-list').style.paddingTop = `${comment_stack[crn][localStorage.getItem('current_channel')]}%`;
         var comment_count = document.querySelector('#comment-list').childElementCount;
         if (comment_count > 0) {
             document.querySelector('#comment-list').lastElementChild.scrollIntoView();
@@ -267,14 +296,22 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('#add-channel-form').onsubmit = () => {
         const channel_name = document.querySelector('#channel').value;
         var comment_stack = JSON.parse(localStorage.getItem('comment_stack'));
-        if( !(channel_name in comment_stack) ) {
+        let crn = getCurrentCrn();
+        if (!(crn in comment_stack)) {
+            comment_stack[crn] = {'general': 110};
+        }
+        if( !(channel_name in comment_stack[crn]) ) {
 
             socket.emit('create channel', channel_name);
 
             // Save comment stack padding on all clients
             socket.on('new channel', new_channel => {
                 var comment_stack = JSON.parse(localStorage.getItem('comment_stack'));
-                comment_stack[new_channel] = 110;
+               let crn = getCurrentCrn();
+                if (!(crn in comment_stack)) {
+                    comment_stack[crn] = {'general': 110};
+                }
+                comment_stack[crn][new_channel] = 110;
                 localStorage.setItem('comment_stack', JSON.stringify(comment_stack));
             });
 
@@ -304,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // send Asynch AJAX request to POST channel data to FLASK server
             const request = new XMLHttpRequest();
-            request.open('POST', '/chatroom');
+            request.open('POST', '/chatroom/'+getCurrentCrn());
 
             // Ensure response is OK, and sending data was succusful
             request.onload = () => {
