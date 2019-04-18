@@ -87,7 +87,7 @@ $(document).ready(function(){
                   <td><a href="/dashboard/instructor/course/{{c.CRN}}">{{ c.title }}</a></td>
                 <td>{{ c.year }}</td>
                 <td>{{ c.term }}</td>
-                <td><button onclick="window.open('/chatroom/{{c.CRN}}','_blank')">Enter chatroom</button></td>
+                <td><button class="btn btn-warning" onclick="window.open('/chatroom/{{c.CRN}}','_blank')">Enter chatroom</button></td>
               </tr>
             {% endfor %}
         </tbody>
