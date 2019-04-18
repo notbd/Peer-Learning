@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from application import db
-from flask_socketio import SocketIO, emit,join_room,leave_room
+from flask_socketio import SocketIO, emit, join_room, leave_room
 from application.models import *
 from application.forms import *
 import flask_login
@@ -467,8 +467,8 @@ def student_question_page(CRN):
             return str(e)
 
 
-@application.route('/dashboard/student/profile', methods=['GET','POST'])
-@application.route('/dashboard/instructor/profile', methods=['GET','POST'])
+@application.route('/dashboard/student/profile', methods=['GET', 'POST'])
+@application.route('/dashboard/instructor/profile', methods=['GET', 'POST'])
 def profile():
     update_profile_form = UserProfileForm(request.form)
 
@@ -477,7 +477,8 @@ def profile():
             return str(update_profile_form.errors)
         try:
             db.session.execute('UPDATE user SET name = "%s",email = "%s" WHERE email = "%s"' %
-                               (update_profile_form.name.data, update_profile_form.email.data, flask_login.current_user.email))
+                               (update_profile_form.name.data, update_profile_form.email.data,
+                                flask_login.current_user.email))
             db.session.commit()
             db.session.close()
         except Exception as e:
@@ -485,7 +486,8 @@ def profile():
             return str(e)
 
         try:
-            queried_user = db.session.execute('SELECT * FROM user WHERE email = "%s"' % update_profile_form.email.data).fetchone()
+            queried_user = db.session.execute(
+                'SELECT * FROM user WHERE email = "%s"' % update_profile_form.email.data).fetchone()
             flask_login.login_user(
                 user_from_query_result(queried_user))
             redirect_endpoint = "instructor_dashboard" if queried_user.user_type == INSTRUCTOR else "student_dashboard"
@@ -493,7 +495,7 @@ def profile():
             return redirect(url_for(redirect_endpoint))
         except Exception as e:
             return str(e)
-    return render_template('profile.html', user=flask_login.current_user, update_profile_form = update_profile_form)
+    return render_template('profile.html', user=flask_login.current_user, update_profile_form=update_profile_form)
 
 
 @login_manager.user_loader
@@ -584,9 +586,11 @@ def any_query():
 
 
 socketio = SocketIO(application)
-channel_list = {"general": [] }
+channel_list = {"general": []}
 present_channel = {"initial": "general"}
-@application.route('/chatroom' , methods=["POST","GET"])
+
+
+@application.route('/chatroom', methods=["POST", "GET"])
 def index1():
     if request.method == "GET":
         # Pass channel list to, and use jinja to display already created channels
@@ -611,21 +615,26 @@ def index1():
         else:
             return jsonify({"success": False})
 
+
 @socketio.on("create channel")
 def create_channel(new_channel):
     emit("new channel", new_channel, broadcast=True)
 
+
 @socketio.on("send message")
 def send_message(message_data):
+    message_data["user"] = "{} ({})".format(flask_login.current_user.name, flask_login.current_user.email)
+    # print "[message_data]", message_data    #  e.g. {u'message_content': u'hello', u'timestamp': u'4/18/2019, 7:39:26 AM', u'current_channel': u'general', u'user': 'Abdu (abdu@illinois.edu)'}
     channel = message_data["current_channel"]
     channel_message_count = len(channel_list[channel])
     del message_data["current_channel"]
     channel_list[channel].append(message_data)
     message_data["deleted_message"] = False
-    if(channel_message_count >= 100):
+    if (channel_message_count >= 100):
         del channel_list[channel][0]
         message_data["deleted_message"] = True
     emit("recieve message", message_data, broadcast=True, room=channel)
+
 
 @socketio.on("delete channel")
 def delete_channel(message_data):
@@ -638,16 +647,20 @@ def delete_channel(message_data):
     message_data = {"data": channel_list["general"], "deleted_channel": channel}
     emit("announce channel deletion", message_data, broadcast=True)
 
+
 @socketio.on("leave")
 def on_leave(room_to_leave):
     print("leaving room")
     leave_room(room_to_leave)
     emit("leave channel ack", room=room_to_leave)
 
+
 @socketio.on("join")
 def on_join(room_to_join):
     print("joining room")
     join_room(room_to_join)
     emit("join channel ack", room=room_to_join)
+
+
 if __name__ == '__main__':
     socketio.run(application, debug=True)
