@@ -1,0 +1,167 @@
+
+$primary-color: #171C2F;
+$secondary-color: #8C93B3;
+$font-stack: 'Josefin Sans', sans-serif;
+$font-stack-comment: 'Josefin Sans', sans-serif;
+
+.app-area {
+  height: 100%;
+}
+
+.color-message-test {
+    background-color: white;
+}
+
+.color-channel-test {
+    background-color: $primary-color;
+}
+
+.comment-media:hover {
+  background-color: #F9F9F9;
+}
+
+#channel-title {
+  margin-left: 30px;
+  font-family: $font-stack;
+}
+
+#message-view {
+  margin-top: 10px;
+}
+
+.col-channel-width {
+    width: 300px;
+    padding-left: 30px;
+}
+
+.channel-input {
+  width: 90%;
+  .add-button {
+    color: $secondary-color;
+    background-color: $primary-color;
+  }
+}
+
+.message-input {
+  width: 95%;
+  margin-top: 10px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 15px;
+  .add-button {
+    color: $secondary-color;
+    background-color: $primary-color;
+  }
+}
+
+.btn:disabled {
+  color: $secondary-color;
+  background-color: $primary-color;
+  opacity: 1.0;
+}
+
+html, body {
+  height: 100%;
+  overflow-y: hidden;
+  overflow-x: hidden;
+}
+
+#user {
+  color: $secondary-color;
+  margin-top: 20px;
+  margin-left: 3px;
+  font-family: $font-stack;
+  font-size: 250%;
+}
+
+#channel-heading {
+  color: $secondary-color;
+  font-family: $font-stack;
+  font-size: 200%;
+}
+
+#channel-option {
+  font-family: $font-stack;
+  font-size: 150%;
+}
+
+.add-button:hover {
+  color: $primary-color;
+  background-color: $secondary-color;
+}
+
+ul {
+  list-style-type: none;
+  text-align: left;
+  margin-left: 0;
+  padding-left: 0;
+  li {
+    color: $secondary-color;
+    font-size: 120%;
+  }
+}
+
+#plus {
+  font-family: $font-stack;
+  font-size: 150%;
+}
+
+#send {
+  font-family: $font-stack;
+  font-size: 120%;
+}
+
+#switch-channel-form:hover {
+  background-color: $secondary-color !important;
+  #channel-option {
+    color: $primary-color !important;
+  }
+}
+
+#submit-switch-channel {
+     background:none;
+     color:inherit;
+     border:none;
+     padding:0;
+     font: inherit;
+     cursor: pointer;
+}
+
+h5, #time {
+  display: inline;
+}
+
+#submit-switch-channel:active, #submit-switch-channel:focus {
+  outline: none;
+}
+
+.comment-container {
+    margin-top: 15px;
+    overflow-y: scroll;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: white;
+    width: 105%;
+    height: 80%;
+    padding: 10px 10px 10px 33px;
+    .comment-item {
+        margin-right: 25px;
+        text-align: left;
+        word-wrap: break-word;
+        .comment-user {
+            font-size: 131%;
+            color: black;
+            font-family: $font-stack-comment;
+        }
+        .comment-comment {
+            font-size: 79%;
+            color: black;
+            font-family: $font-stack-comment;
+        }
+        .comment-time {
+            font-size: 79%;
+            color: black;
+            font-family: $font-stack-comment;
+        }
+    }
+}

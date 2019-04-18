@@ -58,7 +58,7 @@ $(document).ready(function(){
     <form id="AddQuestionForm" action="/dashboard/instructor/question/" method="post">
         {{ add_question_form.hidden_tag() }}
         {{ macros.render_field(add_question_form.CRN, value=CRN, label_visible=false, hidden=true) }}
-        {{ macros.render_field(add_question_form.question_date, value=date, placeholder='MM/DD/YYYY', label_visible=false, hidden=true) }}
+        {{ macros.render_field(add_question_form.question_date, value=date, label_visible=false, hidden=true) }}
         {{ macros.render_field(add_question_form.schemas, placeholder='e.g. Employee(id,name,gender)|Project(id,name,budget)', label_visible=true) }}
         {{ macros.render_field(add_question_form.question, placeholder='', label_visible=true) }}
         <button type="submit" class="btn btn-default">Submit</button>

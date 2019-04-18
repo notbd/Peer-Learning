@@ -1,9 +1,14 @@
+from collections import defaultdict
+
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from application import db
+from flask_socketio import SocketIO, emit, join_room, leave_room
 from application.models import *
 from application.forms import *
 import flask_login
 import query_parser
+import os
+import json
 import datetime
 import json
 
@@ -11,10 +16,11 @@ import json
 application = Flask(__name__)
 db.init_app(application)
 
-# application.debug = True
+application.debug = True
 # change this to your own value
 application.secret_key = 'cC1YCIWOj9GgWspgNEo2'
 application.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+application.config["CACHE_TYPE"] = "null"
 
 login_manager = flask_login.LoginManager()
 login_manager.init_app(application)
@@ -228,6 +234,17 @@ def instructor_question(qid=None):
             # TODO: render form with error msg
             return str(e)
         return redirect(url_for('instructor_session', CRN=crn, date=date))
+
+
+@application.route('/dashboard/instructor/edit-question/<qid>', methods=['POST'])
+def instructor_edit_question(qid):
+    db.session.execute('UPDATE Question '
+                       'SET schemas = :schemas, question = :question '
+                       'WHERE id = :qid',
+                       {'qid': qid, 'schemas': request.form["schemas"], 'question': request.form["question"]})
+    db.session.commit()
+    db.session.close()
+    return "updated question"
 
 
 # page where instructor can manage the questions for a single session
@@ -453,24 +470,35 @@ def student_question_page(CRN):
             return str(e)
 
 
-@application.route('/dashboard/student/profile')
-@application.route('/dashboard/instructor/profile')
+@application.route('/dashboard/student/profile', methods=['GET', 'POST'])
+@application.route('/dashboard/instructor/profile', methods=['GET', 'POST'])
 def profile():
-    return render_template('profile.html', user=flask_login.current_user)
+    update_profile_form = UserProfileForm(request.form)
 
+    if request.method == 'POST':
+        if not update_profile_form.validate():
+            return str(update_profile_form.errors)
+        try:
+            db.session.execute('UPDATE user SET name = "%s",email = "%s" WHERE email = "%s"' %
+                               (update_profile_form.name.data, update_profile_form.email.data,
+                                flask_login.current_user.email))
+            db.session.commit()
+            db.session.close()
+        except Exception as e:
+            db.session.rollback()
+            return str(e)
 
-@application.route('/updateaction/', methods=['POST'])
-def updateaction():
-    params = request.args if request.method == 'GET' else request.form
-    newname = params.get('name')
-    try:
-        db.session.execute('UPDATE user SET name = "%s" WHERE email = "%s"' % (newname, flask_login.current_user.email))
-        db.session.commit()
-        db.session.close()
-    except Exception as e:
-        db.session.rollback()
-        return str(e)
-    return redirect(url_for('student_dashboard'))
+        try:
+            queried_user = db.session.execute(
+                'SELECT * FROM user WHERE email = "%s"' % update_profile_form.email.data).fetchone()
+            flask_login.login_user(
+                user_from_query_result(queried_user))
+            redirect_endpoint = "instructor_dashboard" if queried_user.user_type == INSTRUCTOR else "student_dashboard"
+            db.session.close()
+            return redirect(url_for(redirect_endpoint))
+        except Exception as e:
+            return str(e)
+    return render_template('profile.html', user=flask_login.current_user, update_profile_form=update_profile_form)
 
 
 @login_manager.user_loader
@@ -554,9 +582,90 @@ def any_query():
             return str(e)
 
 
-# def test():
-#     return render_template('test.html')
+socketio = SocketIO(application)
+channel_list_by_course = defaultdict(lambda: {"general": []})
+present_channel = {"initial": "general"}
+
+
+@application.route('/chatroom/<CRN>', methods=["POST", "GET"])
+def index1(CRN):
+    channel_list = channel_list_by_course[CRN]
+    print channel_list_by_course
+    if request.method == "GET":
+        # Pass channel list to, and use jinja to display already created channels
+        # crn = request.args.get('crn')
+        return render_template("index1.html", channel_list=channel_list, user=flask_login.current_user.name, crn=CRN)
+
+    elif request.method == "POST":
+        print "[INFO] POST request on /chatroom", request.form
+        channel = request.form.get("channel_name")
+        user = flask_login.current_user.email
+
+        # Adding a new channel
+        if channel and (channel not in channel_list):
+            channel_list[channel] = []
+            print "[INFO] channel {} created: {}".format(channel, channel_list)
+            return jsonify({"success": True})
+        # Switching to a different channel
+        elif channel in channel_list:
+            # send channel specific data to client i.e. messages, who sent them, and when they were sent
+            # send via JSON response and then render with JS
+            print("Switch to {channel}")
+            present_channel[user] = channel
+            channel_data = channel_list[present_channel[user]]
+            print("channel data:", channel_data)
+            return json.dumps(channel_data)
+        else:
+            print "[INFO] channel {} already existed: {}".format(channel, channel_list)
+            return jsonify({"success": False})
+
+
+@socketio.on("create channel")
+def create_channel(new_channel):
+    emit("new channel", new_channel, broadcast=True)
+
+
+@socketio.on("send message")
+def send_message(message_data):
+    message_data["user"] = "{} ({})".format(flask_login.current_user.name, flask_login.current_user.email)
+    # print "[message_data]", message_data    #  e.g. {u'message_content': u'hello', u'timestamp': u'4/18/2019, 7:39:26 AM', u'current_channel': u'general', u'user': 'Abdu (abdu@illinois.edu)'}
+    channel = message_data["current_channel"]
+    crn = message_data["crn"]
+    channel_message_count = len(channel_list_by_course[crn][channel])
+    # del message_data["current_channel"]
+    channel_list_by_course[crn][channel].append(message_data)
+    message_data["deleted_message"] = False
+    if (channel_message_count >= 100):
+        del channel_list_by_course[crn][channel][0]
+        message_data["deleted_message"] = True
+    emit("receive message", message_data, broadcast=True, room=channel)
+
+
+# @socketio.on("delete channel")
+# def delete_channel(message_data):
+#     channel = message_data["current_channel"]
+#     user = message_data["user"]
+#     present_channel[user] = "general"
+#     del message_data["current_channel"]
+#     del channel_list[channel]
+#     channel_list["general"].append(message_data)
+#     message_data = {"data": channel_list["general"], "deleted_channel": channel}
+#     emit("announce channel deletion", message_data, broadcast=True)
+
+
+@socketio.on("leave")
+def on_leave(room_to_leave):
+    print("leaving room")
+    leave_room(room_to_leave)
+    emit("leave channel ack", room=room_to_leave)
+
+
+@socketio.on("join")
+def on_join(room_to_join):
+    print("joining room")
+    join_room(room_to_join)
+    emit("join channel ack", room=room_to_join)
 
 
 if __name__ == '__main__':
-    application.run(host='0.0.0.0')
+    socketio.run(application, debug=True)
