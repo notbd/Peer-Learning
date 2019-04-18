@@ -453,24 +453,33 @@ def student_question_page(CRN):
             return str(e)
 
 
-@application.route('/dashboard/student/profile')
-@application.route('/dashboard/instructor/profile')
+@application.route('/dashboard/student/profile', methods=['GET','POST'])
+@application.route('/dashboard/instructor/profile', methods=['GET','POST'])
 def profile():
-    return render_template('profile.html', user=flask_login.current_user)
+    update_profile_form = UserProfileForm(request.form)
 
+    if request.method == 'POST':
+        if not update_profile_form.validate():
+            return str(update_profile_form.errors)
+        try:
+            db.session.execute('UPDATE user SET name = "%s",email = "%s" WHERE email = "%s"' %
+                               (update_profile_form.name.data, update_profile_form.email.data, flask_login.current_user.email))
+            db.session.commit()
+            db.session.close()
+        except Exception as e:
+            db.session.rollback()
+            return str(e)
 
-@application.route('/updateaction/', methods=['POST'])
-def updateaction():
-    params = request.args if request.method == 'GET' else request.form
-    newname = params.get('name')
-    try:
-        db.session.execute('UPDATE user SET name = "%s" WHERE email = "%s"' % (newname, flask_login.current_user.email))
-        db.session.commit()
-        db.session.close()
-    except Exception as e:
-        db.session.rollback()
-        return str(e)
-    return redirect(url_for('student_dashboard'))
+        try:
+            queried_user = db.session.execute('SELECT * FROM user WHERE email = "%s"' % update_profile_form.email.data).fetchone()
+            flask_login.login_user(
+                user_from_query_result(queried_user))
+            redirect_endpoint = "instructor_dashboard" if queried_user.user_type == INSTRUCTOR else "student_dashboard"
+            db.session.close()
+            return redirect(url_for(redirect_endpoint))
+        except Exception as e:
+            return str(e)
+    return render_template('profile.html', user=flask_login.current_user, update_profile_form = update_profile_form)
 
 
 @login_manager.user_loader
