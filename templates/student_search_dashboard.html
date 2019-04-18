@@ -1,5 +1,5 @@
 {% extends "base.html" %} {% import 'macros.html' as macros %}
-{% set nav_tabs = [("Home", "/dashboard/student/courses"), ("Profile", "/dashboard/student/profile"), ("Log out", "/logout")] %}
+{% set nav_tabs = [("Home", "/dashboard/student/courses"), ("Profile", "/dashboard/student/profile"), ("Sign Out", "/logout")] %}
 {% block content %}
 
 <style>
@@ -64,13 +64,14 @@
         <br>
 
         <div style="width: 50%; text-shadow: none;" class="input-group flex-nowrap">
-                <div class="input-group-prepend">
-                  <span class="input-group-text" id="addon-wrapping">CRN</span>
-                </div>
-                
-                <input type="number" id="searchBox" class="form-control" placeholder="Search for course here" aria-label="Search for course here" aria-describedby="addon-wrapping">
-              </div>
-        
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="addon-wrapping">CRN</span>
+            </div>
+
+            <input type="number" id="searchBox" class="form-control" placeholder="Search for course here"
+                aria-label="Search for course here" aria-describedby="addon-wrapping">
+        </div>
+
         <br>
 
         <div id="searchResultsDiv">

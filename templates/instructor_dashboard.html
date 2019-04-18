@@ -5,106 +5,111 @@
 
 <!-- CSS -->
 <style>
-#AddCourseForm{
-	display: none;
+  #AddCourseForm {
+    display: none;
     width: 100%;
     height: 50%;
     border: 0px solid #fff;
     padding: 5px;
     background: #333;
-}
+  }
 
-td, th {
-  border: 1px solid #dddddd;
-  text-align: left;
-  padding: 8px;
-}
+  td,
+  th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+  }
 
-/* toast */
-.toast {
-  color: #333;
-  text-shadow: none;
-  text-align: left;
-}
+  /* toast */
+  .toast {
+    color: #333;
+    text-shadow: none;
+    text-align: left;
+  }
 </style>
 
 
 
 <!-- script -->
 <script>
-$(document).ready(function(){
-	$('#AddCourseBtn').click(function(){
-  		$('#AddCourseForm').toggle(500);
+  $(document).ready(function () {
+    $('#AddCourseBtn').click(function () {
+      $('#AddCourseForm').toggle(500);
+    });
   });
-});
 
-$(document).ready(function(){
+  $(document).ready(function () {
     $('.toast').toast('show');
-});
+  });
 </script>
 
 <!-- content -->
 <main role="main">
 
-    <div class="container-fluid">
+  <div class="container-fluid">
 
-        <div aria-live="polite" aria-atomic="true">
-            <div class="toast" style="position: absolute; top: 80; width: 200rem;" data-delay="3000">
-              <div class="toast-header">
-                  <svg class="bd-placeholder-img rounded mr-2" width="20" height="20" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img"><rect fill="#018abf" width="100%" height="100%"></rect></svg>
-                <strong class="mr-auto">Peer Learning</strong>
-                <small class="text-muted">Greeting Message</small>
-                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="toast-body">
-                  Welcome back, {{current_user.name}}!
-              </div>
-            </div>
-          </div>
-
-      <h1 class="cover-heading">Instructor Panel</h1>
-      <br>
-      <br>
-
-      <h3>Your current course(s):</h3>
-      <br>
-      <table class="table table-hover table-dark">
-        <thead>
-          <tr>
-            <th scope="col">CRN</th>
-            <th scope="col">Title</th>
-            <th scope="col">Year</th>
-            <th scope="col">Term</th>
-            <th scope="col">Chatroom</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for c in courses %}
-              <tr>
-                <td>{{ c.CRN }}</td>
-                  <td><a href="/dashboard/instructor/course/{{c.CRN}}">{{ c.title }}</a></td>
-                <td>{{ c.year }}</td>
-                <td>{{ c.term }}</td>
-                <td><button class="btn btn-warning" onclick="window.open('/chatroom/{{c.CRN}}','_blank')">Enter chatroom</button></td>
-              </tr>
-            {% endfor %}
-        </tbody>
-      </table>
-      
-      <br>
-      <button id="AddCourseBtn" class="btn btn-info">Add Course</button>
-      <br>
-      <form id="AddCourseForm" action="/dashboard/instructor/courses" method="post">
-          {{ add_course_form.hidden_tag() }}
-          {{ macros.render_field(add_course_form.CRN, placeholder='24521', label_visible=true) }}
-          {{ macros.render_field(add_course_form.title, placeholder='CS 411', label_visible=true) }}
-          {{ macros.render_field(add_course_form.year, placeholder='2019', label_visible=true) }}
-          {{ macros.render_field(add_course_form.term, placeholder='spring', label_visible=true) }}
-          <button type="submit" class="btn btn-info">Submit</button>
-      </form>
+    <div aria-live="polite" aria-atomic="true">
+      <div class="toast" style="position: absolute; top: 80; width: 200rem;" data-delay="3000">
+        <div class="toast-header">
+          <svg class="bd-placeholder-img rounded mr-2" width="20" height="20" xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="xMidYMid slice" focusable="false" role="img">
+            <rect fill="#018abf" width="100%" height="100%"></rect>
+          </svg>
+          <strong class="mr-auto">Peer Learning</strong>
+          <small class="text-muted">Greeting Message</small>
+          <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="toast-body">
+          Welcome back, {{current_user.name}}!
+        </div>
       </div>
+    </div>
+
+    <h1 class="cover-heading">Instructor Panel</h1>
+    <br>
+    <br>
+
+    <h3>Your current course(s):</h3>
+    <br>
+    <table class="table table-hover table-dark">
+      <thead>
+        <tr>
+          <th scope="col">CRN</th>
+          <th scope="col">Title</th>
+          <th scope="col">Year</th>
+          <th scope="col">Term</th>
+          <th scope="col">Chatroom</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in courses %}
+        <tr>
+          <td>{{ c.CRN }}</td>
+          <td><a href="/dashboard/instructor/course/{{c.CRN}}">{{ c.title }}</a></td>
+          <td>{{ c.year }}</td>
+          <td>{{ c.term }}</td>
+          <td><button class="btn btn-warning" onclick="window.open('/chatroom/{{c.CRN}}','_blank')">Enter
+              chatroom</button></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <br>
+    <button id="AddCourseBtn" class="btn btn-info">Add Course</button>
+    <br>
+    <form id="AddCourseForm" action="/dashboard/instructor/courses" method="post">
+      {{ add_course_form.hidden_tag() }}
+      {{ macros.render_field(add_course_form.CRN, placeholder='24521', label_visible=true) }}
+      {{ macros.render_field(add_course_form.title, placeholder='CS 411', label_visible=true) }}
+      {{ macros.render_field(add_course_form.year, placeholder='2019', label_visible=true) }}
+      {{ macros.render_field(add_course_form.term, placeholder='spring', label_visible=true) }}
+      <button type="submit" class="btn btn-info">Submit</button>
+    </form>
+  </div>
 
 </main>
 

@@ -1,34 +1,28 @@
 {% extends "base.html" %} {% import 'macros.html' as macros %}
-{% set nav_tabs = [("Home", "/dashboard/instructor/courses"), ("Profile", "/dashboard/instructor/profile"), ("Log out", "/logout")] %}
+{% set nav_tabs = [("Home", "/dashboard/instructor/courses"), ("Profile", "/dashboard/instructor/profile"), ("Sign Out", "/logout")] %}
 {% set active_tab = "Profile" %}
 {% block content %}
 <style>
-.jumbotron{
-    background: #444;
-    text-shadow: none;
-}
+    .jumbotron {
+        background: #444;
+        text-shadow: none;
+    }
 </style>
 <main role="main" class="inner cover">
-        <div class="jumbotron">
-                <h1 class="display-4">{{user.name}}</h1>
-                <p class="lead">User Type: {{user.type}}</p>
-                <p class="lead">Email: {{user.email}}</p>
+    <div class="jumbotron">
+        <h1 class="display-4">{{user.name}}</h1>
+        <p class="lead">User Type: {{user.type}}</p>
+        <p class="lead">Email: {{user.email}}</p>
 
-                <hr>
-                <h3 class="display-5">Edit Info</h3>
-                 <form id="UserProfileForm" action="/dashboard/student/profile" method="post">
-                    {{ update_profile_form.hidden_tag() }}
-                    {{ macros.render_field(update_profile_form.name, value= user.name, label_visible=true) }}
-                    {{ macros.render_field(update_profile_form.email, value= user.email, label_visible=true) }}
-                    <button type="submit" class="btn btn-info">Submit</button>
-                </form>
-              </div>
-    <!-- <form id="UserProfileForm" action="/dashboard/student/profile" method="post">
-        {{ update_profile_form.hidden_tag() }}
-        {{ macros.render_field(update_profile_form.name, value= user.name, label_visible=true) }}
-        {{ macros.render_field(update_profile_form.email, value= user.email, label_visible=true) }}
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form> -->
+        <hr>
+        <h3 class="display-5">Edit Info</h3>
+        <form id="UserProfileForm" action="/dashboard/student/profile" method="post">
+            {{ update_profile_form.hidden_tag() }}
+            {{ macros.render_field(update_profile_form.name, value= user.name, label_visible=true) }}
+            {{ macros.render_field(update_profile_form.email, value= user.email, label_visible=true) }}
+            <button type="submit" class="btn btn-info">Submit</button>
+        </form>
+    </div>
 </main>
 
 
