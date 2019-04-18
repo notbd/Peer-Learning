@@ -9,7 +9,7 @@
             <div class="col-channel-width color-channel-test">
                 <h4 id="user"></h4>
                 <h1 id="channel-heading">Channels</h1>
-                <form id="add-channel-form">
+                <form id="add-channel-form" action="/chatroom" method="post">
                     <div class="input-group mb-3 channel-input">
                         <input id="channel" type="text" class="form-control" placeholder="New channel name" aria-describedby="basic-addon2">
                         <div class="input-group-append">
@@ -19,7 +19,7 @@
                 </form>
                 <ul id="channels">
                     {% for channel in channel_list %}
-                        <form id="switch-channel-form">
+                        <form id="switch-channel-form" action="/chatroom" method="post">
                             <button id="submit-switch-channel" type="submit" value={{channel}}><li id="channel-option"># {{channel}}</li></button>
                         </form>
                     {% endfor %}
@@ -30,7 +30,7 @@
                     <ul id="comment-list" class="list-unstyled">
                     </ul>
                 </div>
-                <form id="message-form">
+                <form id="message-form" action="/chatroom"  method="post">
                     <div class="input-group mb-3 message-input">
                         <input id="message-input" type="text" class="form-control" placeholder="Enter message here" aria-describedby="basic-addon2">
                         <div class="input-group-append">

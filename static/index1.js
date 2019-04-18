@@ -1,5 +1,5 @@
 
-
+console.log(localStorage);
 
 if (!localStorage.getItem('display_name') && !localStorage.getItem('current_channel') && !localStorage.getItem('comment_stack') ) {
     var username = "admin" ;
@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         Parse JSON message data response from server. This functionality is used to generate the proper message view
         when the user refreshes the page, or switches channels.
         */
+        console.log("[asynch_load_messages]", request)
         const data = JSON.parse(request.responseText);
         for(var i = 0; i < data.length; i++) {
             const comment = template({'comment': data[i]});
@@ -87,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Generate message view with data from server for user switching to a new channel
             const request = new XMLHttpRequest();
-            request.open('POST', '/');
+            request.open('POST', '/chatroom');
             request.onload = asynch_load_messages.bind(null, request, refresh=false);
             const data = new FormData();
             data.append('channel_name', localStorage.getItem('current_channel'));
@@ -117,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Generate message view for user with data from server
     const request = new XMLHttpRequest();
-    request.open('POST', '/');
+    request.open('POST', '/chatroom');
     request.onload = asynch_load_messages.bind(null, request, refresh=true);
     const data = new FormData();
     data.append('username', username);
@@ -303,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // send Asynch AJAX request to POST channel data to FLASK server
             const request = new XMLHttpRequest();
-            request.open('POST', '/');
+            request.open('POST', '/chatroom');
 
             // Ensure response is OK, and sending data was succusful
             request.onload = () => {

@@ -597,12 +597,14 @@ def index1():
         return render_template("index1.html", channel_list=channel_list)
 
     elif request.method == "POST":
+        print "[INFO] POST request on /chatroom", request.form
         channel = request.form.get("channel_name")
         user = "wtf"
 
         # Adding a new channel
         if channel and (channel not in channel_list):
             channel_list[channel] = []
+            print "[INFO] channel {} created: {}".format(channel, channel_list)
             return jsonify({"success": True})
         # Switching to a different channel
         elif channel in channel_list:
@@ -611,15 +613,16 @@ def index1():
             print("Switch to {channel}")
             present_channel[user] = channel
             channel_data = channel_list[present_channel[user]]
-            return jsonify(channel_data)
+            print("channel data:", channel_data)
+            return json.dumps(channel_data)
         else:
+            print "[INFO] channel {} already existed: {}".format(channel, channel_list)
             return jsonify({"success": False})
 
 
 @socketio.on("create channel")
 def create_channel(new_channel):
     emit("new channel", new_channel, broadcast=True)
-
 
 @socketio.on("send message")
 def send_message(message_data):
