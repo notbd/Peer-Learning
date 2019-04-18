@@ -58,16 +58,26 @@ $(document).ready(function(){
   });
 
   $('#startQuestionBtn').click(function() {
-    $('#startQuestionBtn').prop('disabled', true);
-    var qid = $(this).data('qid');
-    var crn = $(this).data('crn');
-    var data = {
-        crn: crn,
-        qid: qid
+    if ($(this).html() == "Start") {
+        $(this).html('End');
+        var data = {
+            crn: $(this).data('crn'),
+            qid: $(this).data('qid')
+        }
+        $.post("/set-active-question", data, function(data, status) {
+            console.log(`${data} and status is ${status}`)
+        });
+    } else {
+        $(this).html('Start');
+        var data = {
+            crn: $(this).data('crn'),
+            qid: "null",
+        }
+        $.post("/set-active-question", data, function(data, status) {
+            console.log(`${data} and status is ${status}`)
+        });
+
     }
-    $.post("/set-active-question", data, function(data, status) {
-        console.log(`${data} and status is ${status}`)
-    });
   });
 
 });
@@ -81,11 +91,9 @@ $(document).ready(function(){
     <!--question div-->
     <div style="background-color: #505c61; padding:10px;  overflow: hidden">
         <button id="editQuestionBtn" style="float:right">Edit</button>
-        {% if is_active %}
-        <button id="startQuestionBtn" style="float:right" disabled  data-qid="{{q.id}}" data-crn="{{q.CRN}}">Start</button>
-        {% else %}
-        <button id="startQuestionBtn" style="float:right" data-qid="{{q.id}}" data-crn="{{q.CRN}}">Start</button>
-        {% endif %}
+        <button id="startQuestionBtn" style="float:right" data-qid="{{q.id}}" data-crn="{{q.CRN}}">
+        {% if is_active %} End {% else %} Start {% endif %}
+        </button>
         {% if q.schemas is not none %}
         <div style="color:#7a9fab;">
             <div style="font-family:monospace">Schemas: </div>
