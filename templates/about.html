@@ -1,0 +1,54 @@
+{% extends "base.html" %} {% import 'macros.html' as macros %}
+{% set nav_tabs = [("Home", "/index"), ("About", "/about")] %}
+{% set active_tab = "About" %}
+{% block content %}
+
+<main role="main" class="inner cover">
+
+  <h1 class="cover-heading">Our Team</h1>
+  <br>
+
+  <ul class="list-unstyled">
+
+    <!-- Angelica Li -->
+    <li class="media my-4">
+      <img src="https://avatars3.githubusercontent.com/u/19180693?s=60&amp;v=4" class="avatar mr-3" alt="" width="38" height="38">
+      <div class="media-body">
+        <h5 class="mt-0 mb-1">Angelica Li</h5>
+        Some fun fact about yourself!
+      </div>
+    </li>
+
+    <!-- Tianwei Peter Zhang -->
+    <li class="media my-4">
+      <img src="https://avatars0.githubusercontent.com/u/25305842?s=60&amp;v=4" class="avatar mr-3" alt="" width="38" height="38">
+      <div class="media-body">
+        <h5 class="mt-0 mb-1">Tianwei Peter Zhang</h5>
+        He's probably drinking diet coke at this moment.
+      </div>
+    </li>
+
+    <!-- Wang Bo -->
+    <li class="media my-4">
+      <img src="https://avatars0.githubusercontent.com/u/22734444?s=60&amp;v=4" class="avatar mr-3" alt="" width="38" height="38">
+      <div class="media-body">
+        <h5 class="mt-0 mb-1">Wang Bo</h5>
+        Some fun fact about yourself!
+    </li>
+
+    <!-- Xinye Yang -->
+    <li class="media my-4">
+      <img src="https://avatars1.githubusercontent.com/u/26752757?s=60&amp;v=4" class="avatar mr-3" alt="" width="38" height="38">
+      <div class="media-body">
+        <h5 class="mt-0 mb-1">Xinye Yang</h5>
+        Some fun fact about yourself!
+      </div>
+    </li>
+
+    <p><small>Visit our <a  href='https://github.com/zhang13music/Peer-Learning' title="Github"><i class="fab fa-github"></i></a> repo for more information.</small></p>
+
+  </ul>
+  
+</main>
+
+{% endblock %}
