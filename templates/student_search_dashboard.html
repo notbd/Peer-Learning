@@ -3,80 +3,94 @@
 {% block content %}
 
 <style>
-table {
-  font-family: arial, sans-serif;
-  border-collapse: collapse;
-  width: 100%;
-}
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
 
-td, th {
-  border: 1px solid #dddddd;
-  text-align: left;
-  padding: 8px;
-}
+    td,
+    th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
 
-#searchResultsDiv {
-    min-height: 80%;
-}
-
+    /* #searchResultsDiv {
+        min-height: 80%;
+    } */
 </style>
 
 <script>
+    $(document).on('click', '.registerBtn', function () {
+        var data = {
+            CRN: $(this).data("crn")
+        }
+        $.post("/dashboard/student/add-course", data, function (data, status) {
+            window.location.href = "/dashboard/student/courses";
+        });
+    });
 
-$(document).on('click', '.registerBtn', function(){
-      var data = {
-        CRN: $(this).data("crn")
-      }
-      $.post("/dashboard/student/add-course", data, function(data, status){
-        window.location.href = "/dashboard/student/courses";
-      });
-});
-
-$(document).ready(function(){
-    $( "#searchBox" ).keyup(function() {
-        $.get("/search-course?q=" + $(this).val(), function(data, status) {
-            $('#searchResultsTable').find("tr:gt(0)").remove();
-            if (data.length == 0) {
-                return ;
-            }
-            var results = $.parseJSON(data);
-            for (course of results) {
-                $('#searchResultsTable tr:first').after(
-                    `<tr>
+    $(document).ready(function () {
+        $("#searchBox").keyup(function () {
+            $.get("/search-course?q=" + $(this).val(), function (data, status) {
+                $('#searchResultsTable').find("tr:gt(0)").remove();
+                if (data.length == 0) {
+                    return;
+                }
+                var results = $.parseJSON(data);
+                for (course of results) {
+                    $('#searchResultsTable tr:first').after(
+                        `<tr>
                         <td>${course['CRN']}</td>
                         <td>${course['title']}</td>
                         <td>${course['year']}</td>
                         <td>${course['term']}</td>
                         <td>${course['instructor']}</td>
-                        <td><button class='btn btn-primary registerBtn' data-crn="${course['CRN']}"=>Register</button></td>
+                        <td><button class='btn btn-info registerBtn' data-crn="${course['CRN']}"=>Register</button></td>
                     </tr>`
-                );
-            }
+                    );
+                }
+            });
         });
     });
-});
-
-
 </script>
 
 <main role="main" class="inner cover">
-    <input type="text" id="searchBox" placeholder="Search for course here">
-    <div id="searchResultsDiv">
-        <table id="searchResultsTable">
-            <tbody>
-            <tr>
-                <td>CRN</td>
-                <td>title</td>
-                <td>year</td>
-                <td>term</td>
-                <td>instructor</td>
-                <td>register</td>
-            </tr>
-            </tbody>
-        </table>
+    <div class="container-fluid">
+
+        <h1 class="cover-heading">Add Course</h1>
+        <br>
+        <br>
+
+        <div style="width: 50%; text-shadow: none;" class="input-group flex-nowrap">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="addon-wrapping">CRN</span>
+                </div>
+                
+                <input type="number" id="searchBox" class="form-control" placeholder="Search for course here" aria-label="Search for course here" aria-describedby="addon-wrapping">
+              </div>
+        
+        <br>
+
+        <div id="searchResultsDiv">
+            <table id="searchResultsTable" class="table table-hover table-dark">
+                <thead>
+                    <tr>
+                        <th scope="col">CRN</th>
+                        <th scope="col">Title</th>
+                        <th scope="col">Year</th>
+                        <th scope="col">Term</th>
+                        <th scope="col">Instructor</th>
+                        <th scope="col">Register</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
     </div>
 </main>
 
-</div>
 
 {% endblock %}

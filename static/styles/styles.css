@@ -16,7 +16,7 @@
 
 #channel-title {
   margin-left: 30px;
-  font-family: 'Inconsolata', monospace;
+  font-family: arial, sans-serif;
 }
 
 #message-view {
@@ -67,18 +67,18 @@ body {
   color: #8C93B3;
   margin-top: 20px;
   margin-left: 3px;
-  font-family: 'Inconsolata', monospace;
+  font-family: arial, sans-serif;
   font-size: 250%;
 }
 
 #channel-heading {
   color: #8C93B3;
-  font-family: 'Inconsolata', monospace;
+  font-family: arial, sans-serif;
   font-size: 200%;
 }
 
 #channel-option {
-  font-family: 'Inconsolata', monospace;
+  font-family: arial, sans-serif;
   font-size: 150%;
 }
 
@@ -100,12 +100,12 @@ ul li {
 }
 
 #plus {
-  font-family: 'Inconsolata', monospace;
+  font-family: arial, sans-serif;
   font-size: 150%;
 }
 
 #send {
-  font-family: 'Inconsolata', monospace;
+  font-family: arial, sans-serif;
   font-size: 120%;
 }
 
@@ -156,17 +156,17 @@ h5,
 .comment-container .comment-item .comment-user {
   font-size: 131%;
   color: black;
-  font-family: 'Inconsolata', monospace;
+  font-family: arial, sans-serif;
 }
 
 .comment-container .comment-item .comment-comment {
   font-size: 79%;
   color: black;
-  font-family: 'Inconsolata', monospace;
+  font-family: arial, sans-serif;
 }
 
 .comment-container .comment-item .comment-time {
   font-size: 79%;
   color: black;
-  font-family: 'Inconsolata', monospace;
+  font-family: arial, sans-serif;
 }
