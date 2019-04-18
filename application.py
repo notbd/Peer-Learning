@@ -1,9 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from application import db
+from flask_socketio import SocketIO, emit,join_room,leave_room
 from application.models import *
 from application.forms import *
 import flask_login
 import query_parser
+import os
+import json
 import datetime
 import json
 
@@ -578,5 +581,73 @@ def any_query():
 #     return render_template('test.html')
 
 
+
+
+socketio = SocketIO(application)
+channel_list = {"general": [] }
+present_channel = {"initial": "general"}
+@application.route('/chatroom' , methods=["POST","GET"])
+def index1():
+    if request.method == "GET":
+        # Pass channel list to, and use jinja to display already created channels
+        return render_template("index1.html", channel_list=channel_list)
+
+    elif request.method == "POST":
+        channel = request.form.get("channel_name")
+        user = "wtf"
+
+        # Adding a new channel
+        if channel and (channel not in channel_list):
+            channel_list[channel] = []
+            return jsonify({"success": True})
+        # Switching to a different channel
+        elif channel in channel_list:
+            # send channel specific data to client i.e. messages, who sent them, and when they were sent
+            # send via JSON response and then render with JS
+            print("Switch to {channel}")
+            present_channel[user] = channel
+            channel_data = channel_list[present_channel[user]]
+            return jsonify(channel_data)
+        else:
+            return jsonify({"success": False})
+
+@socketio.on("create channel")
+def create_channel(new_channel):
+    emit("new channel", new_channel, broadcast=True)
+
+@socketio.on("send message")
+def send_message(message_data):
+    channel = message_data["current_channel"]
+    channel_message_count = len(channel_list[channel])
+    del message_data["current_channel"]
+    channel_list[channel].append(message_data)
+    message_data["deleted_message"] = False
+    if(channel_message_count >= 100):
+        del channel_list[channel][0]
+        message_data["deleted_message"] = True
+    emit("recieve message", message_data, broadcast=True, room=channel)
+
+@socketio.on("delete channel")
+def delete_channel(message_data):
+    channel = message_data["current_channel"]
+    user = message_data["user"]
+    present_channel[user] = "general"
+    del message_data["current_channel"]
+    del channel_list[channel]
+    channel_list["general"].append(message_data)
+    message_data = {"data": channel_list["general"], "deleted_channel": channel}
+    emit("announce channel deletion", message_data, broadcast=True)
+
+@socketio.on("leave")
+def on_leave(room_to_leave):
+    print("leaving room")
+    leave_room(room_to_leave)
+    emit("leave channel ack", room=room_to_leave)
+
+@socketio.on("join")
+def on_join(room_to_join):
+    print("joining room")
+    join_room(room_to_join)
+    emit("join channel ack", room=room_to_join)
 if __name__ == '__main__':
-    application.run(host='0.0.0.0')
+    socketio.run(application, debug=True)
