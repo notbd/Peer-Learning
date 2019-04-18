@@ -4,51 +4,58 @@
 {% block content %}
 
 <style>
-textarea {
+  textarea {
     border-radius: 10px;
     outline: none;
     padding: 10px;
     font-family: monospace;
-    width:100%;
+    width: 100%;
     margin-bottom: 10px;
     -webkit-box-sizing: border-box;
-       -moz-box-sizing: border-box;
-            box-sizing: border-box;
-}
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
 
-p {
+  p {
     margin-left: 10px;
-}
+  }
 </style>
 
 <main role="main" class="inner cover">
-    <h2 class="cover-heading">Question</h2>
+  <div class="container-fluid">
+    
+    <h1 class="cover-heading">Question</h1>
+    <br>
 
-        {% if question is none %}
-          <p>No question at this moment! :)</p>
-        {% else %}
-          <div style="margin:20; word-wrap: break-word;">
-              {% if question[2] is not none %}
-              <div style="color:#7a9fab;">
-                <p style="font-family:monospace">Schemas:
-              <!--schemas is stored (in db) in the format of: Employee(id,name,gender,salary)|Project(id,name)-->
-                {% for schema in question[2].split("|") %}
-                    <br>{{schema}}
-                {% endfor %}
-                </p>
-              </div>
-              {% endif %}
-              <p>{{question[1]}}</p>
-              <form method="post">
-                <input type="hidden" name="qid" value="{{question[0]}}">
-                <textarea name="response" rows="10">{{response}}</textarea> <br>
-                  {% if msg is defined %}
-                    <small class="text-muted">{{msg}}</small>
-                  {% endif %}
-                <button type="submit" class="btn btn-primary" style="float:right">Submit</button>
-              </form>
-          </div>
+    {% if question is none %}
+    <p>No question at this moment! :)</p>
+    {% else %}
+    <div style="margin:20; word-wrap: break-word;">
+      {% if question[2] is not none %}
+      <div style="color:#7a9fab;">
+        <p style="font-family:monospace">Schemas:
+          <!--schemas is stored (in db) in the format of: Employee(id,name,gender,salary)|Project(id,name)-->
+          {% for schema in question[2].split("|") %}
+          <br>{{schema}}
+          {% endfor %}
+        </p>
+      </div>
+      {% endif %}
+
+      <p>{{question[1]}}</p>
+
+      <form method="post">
+        <input type="hidden" name="qid" value="{{question[0]}}">
+        <textarea name="response" rows="10" placeholder="Type your answer here:">{{response}}</textarea> <br>
+        {% if msg is defined %}
+        <small class="text-muted">{{msg}}</small>
         {% endif %}
+        <button type="submit" class="btn btn-info" style="float:right">Submit</button>
+      </form>
+
+    </div>
+    {% endif %}
+  </div>
 </main>
 
 {% endblock %}
