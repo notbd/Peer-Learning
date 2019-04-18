@@ -4,88 +4,57 @@
 {% block content %}
 
 <style>
-table {
-  font-family: arial, sans-serif;
-  border-collapse: collapse;
-  width: 100%;
-}
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
 
-td, th {
-  border: 1px solid #dddddd;
-  text-align: left;
-  padding: 8px;
-}
-
-
-
+    td,
+    th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
 </style>
 
 <script>
-$(document).ready(function(){
-	$('#addSessionBtn').click(function(){
-        var date = $('#newSession').val();
-        $(location).attr('href', '/dashboard/instructor/session/' + "{{course_CRN}}" + "/" + date);
-  });
-});
-
+    $(document).ready(function () {
+        $('#addSessionBtn').click(function () {
+            var date = $('#newSession').val();
+            $(location).attr('href', '/dashboard/instructor/session/' + "{{course_CRN}}" + "/" + date);
+        });
+    });
 </script>
 
 
 <main role="main" class="inner cover">
-        <div class="container-fluid">
-                <h1 class="cover-heading">Questions for {{course_title}}:</h1>
-                <br>
-                <br>
+    <div class="container-fluid">
+        <h1 class="cover-heading">Questions for {{course_title}}:</h1>
+        <br>
+        <br>
 
-                <table class="table table-hover table-dark">
-                        <thead>
-                          <tr>
-                            <th scope="col">Session Date</th>
-                            <th scope="col"># of Questions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                            {% for date, cnt in session_info %}
-                            <tr>
-                                <td><a href="/dashboard/instructor/session/{{course_CRN}}/{{date[:10]}}">{{date[:10]}}</a></td>
-                                <td>{{cnt}}</td>
-                            </tr>
-                            {% endfor %}
-                            <tr>
-                                <td> <input id="newSession" type="date"/> </td>
-                                <!-- <td>
-                                        <div class="container">
-                                                <div class="row">
-                                                    <div class='col-sm-6'>
-                                                        <div class="form-group">
-                                                            <div class='input-group date' id='datetimepicker5'>
-                                                                <input type='text' class="form-control" />
-                                                                <span class="input-group-addon">
-                                                                    <span class="glyphicon glyphicon-calendar"></span>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <script type="text/javascript">
-                                                        $(function () {
-                                                            $('#datetimepicker5').datetimepicker({
-                                                                defaultDate: "11/1/2013",
-                                                                disabledDates: [
-                                                                    moment("12/25/2013"),
-                                                                    new Date(2013, 11 - 1, 21),
-                                                                    "11/22/2013 00:53"
-                                                                ]
-                                                            });
-                                                        });
-                                                    </script>
-                                                </div>
-                                            </div>
-                                </td> -->
-                                <td> <button id="addSessionBtn" class="btn btn-info">New Session</button> </td>
-                            </tr>
-                        </tbody>
-                      </table>
-            </div>
+        <table class="table table-hover table-dark">
+            <thead>
+                <tr>
+                    <th scope="col">Session Date</th>
+                    <th scope="col"># of Questions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for date, cnt in session_info %}
+                <tr>
+                    <td><a href="/dashboard/instructor/session/{{course_CRN}}/{{date[:10]}}">{{date[:10]}}</a></td>
+                    <td>{{cnt}}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td> <input id="newSession" type="date" /> </td>
+                    <td> <button id="addSessionBtn" class="btn btn-info">New Session</button> </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </main>
 
 {% endblock %}
