@@ -19,6 +19,12 @@ a:hover {
   border: .05rem solid #fff;
 }
 
+/* toast */
+.toast {
+  color: #333;
+  text-shadow: none;
+  text-align: left;
+}
 
 /*
  * Base structure

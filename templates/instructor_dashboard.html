@@ -19,7 +19,16 @@ td, th {
   text-align: left;
   padding: 8px;
 }
+
+/* toast */
+.toast {
+  color: #333;
+  text-shadow: none;
+  text-align: left;
+}
 </style>
+
+
 
 <!-- script -->
 <script>
@@ -28,6 +37,10 @@ $(document).ready(function(){
   		$('#AddCourseForm').toggle(500);
   });
 });
+
+$(document).ready(function(){
+    $('.toast').toast('show');
+});
 </script>
 
 <!-- content -->
@@ -35,11 +48,26 @@ $(document).ready(function(){
 
     <div class="container-fluid">
 
+        <div aria-live="polite" aria-atomic="true">
+            <div class="toast" style="position: absolute; top: 80; width: 200rem;" data-delay="3000">
+              <div class="toast-header">
+                  <svg class="bd-placeholder-img rounded mr-2" width="20" height="20" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img"><rect fill="#333" width="100%" height="100%"></rect></svg>
+                <strong class="mr-auto">Peer Learning</strong>
+                <small class="text-muted">Greeting Message</small>
+                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="toast-body">
+                  Welcome back, {{current_user.name}}!
+              </div>
+            </div>
+          </div>
+
       <h1 class="cover-heading">Instructor Panel</h1>
       <br>
       <br>
 
-      <h3>Welcome back, {{current_user.name}}!</h3>
       <h3>Your current course(s):</h3>
       <br>
       <table class="table table-hover table-dark">
