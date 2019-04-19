@@ -96,7 +96,7 @@ $(document).ready(function(){
         </button>
         {% if q.schemas is not none %}
         <div style="color:#7a9fab;">
-            <div style="font-family:monospace">Schemas: </div>
+            <div style="font-family:monospace">Schema(s): </div>
                 <!--schemas is stored (in db) in the format of: Employee(id,name,gender,salary)|Project(id,name)-->
                 <p id="schema" style="font-family:monospace"> {% for schema in q.schemas.split("|") %}
                     {{schema}}<br>
