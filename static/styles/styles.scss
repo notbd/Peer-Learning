@@ -1,6 +1,6 @@
 
-$primary-color: #171C2F;
-$secondary-color: #8C93B3;
+$primary-color: #333333;
+$secondary-color: #e3e8db;
 $font-stack: 'Josefin Sans', sans-serif;
 $font-stack-comment: 'Josefin Sans', sans-serif;
 
@@ -150,17 +150,17 @@ h5, #time {
         word-wrap: break-word;
         .comment-user {
             font-size: 131%;
-            color: black;
+            color: #333333;
             font-family: $font-stack-comment;
         }
         .comment-comment {
             font-size: 79%;
-            color: black;
+            color: #333333;
             font-family: $font-stack-comment;
         }
         .comment-time {
             font-size: 79%;
-            color: black;
+            color: #333333;
             font-family: $font-stack-comment;
         }
     }
