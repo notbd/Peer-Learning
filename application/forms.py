@@ -50,6 +50,7 @@ class AddQuestionForm(Form):
     question = StringField(label='Question Content')
 
 class UserProfileForm(Form):
+    password = PasswordField(label='Password')
     email = EmailField(label='Email Address', validators=[validators.DataRequired(), validators.Email()])
     name = StringField(label='Name', description="name", validators=[validators.Length(min=1, max=80,
                                                                                        message=u'Name needs to be 1-80 character(s) long')])

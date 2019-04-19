@@ -4,15 +4,20 @@ console.log(localStorage);
 if (!localStorage.getItem('display_name') && !localStorage.getItem('current_channel') && !localStorage.getItem('comment_stack') ) {
     var username = "admin" ;
     localStorage.setItem('display_name', username);
-    localStorage.setItem('current_channel', 'general');
-    localStorage.setItem('comment_stack', JSON.stringify({'general': 110}));
+    localStorage.setItem('current_channel', JSON.stringify({}));
+    localStorage.setItem('comment_stack', JSON.stringify({}));
+    console.log("local storage reset: ", localStorage);
 }
 
 function getCurrentCrn() {
     var crn = document.getElementById('crn').textContent;
     if (crn!=previousCrn) {
         previousCrn = crn;
-        localStorage.setItem('current_channel', 'general');
+        var current_channel = JSON.parse(localStorage.getItem('current_channel'));
+        current_channel[crn] = 'general';
+        console.log("setting current channel", current_channel);
+        console.log(typeof current_channel);
+        localStorage.setItem('current_channel', JSON.stringify(current_channel));
     }
     return crn;
 }
@@ -31,8 +36,12 @@ document.addEventListener('DOMContentLoaded', () => {
 //    var username = localStorage.getItem('display_name');
 //    document.querySelector('#user').innerHTML = username;
 
-    var current_channel = localStorage.getItem('current_channel');
-    const channel_to_display = template_title({'channel_to_display': current_channel});
+    var current_channel_map = JSON.parse(localStorage.getItem('current_channel'));
+    var crn = getCurrentCrn();
+    if (!(crn in current_channel_map)) {
+        current_channel_map[crn] = 'general';
+    }
+    const channel_to_display = template_title({'channel_to_display': current_channel_map[crn]});
     var channel_element = channel_to_display, parser = new DOMParser(), doc = parser.parseFromString(channel_element, 'text/xml');
     document.querySelector('#message-view').prepend(doc.querySelector('#channel-title'));
 
@@ -52,7 +61,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!(crn in comment_stack)) {
             comment_stack[crn] = {'general': 110};
         }
-        document.querySelector('#comment-list').style.paddingTop = `${comment_stack[crn][current_channel]}%`;
+        if (!(crn in current_channel_map)) {
+            current_channel_map[crn] = 'general';
+        }
+        document.querySelector('#comment-list').style.paddingTop = `${comment_stack[crn][current_channel_map[crn]]}%`;
         var comment_count = document.querySelector('#comment-list').childElementCount;
         if (comment_count > 0) {
             document.querySelector('#comment-list').lastElementChild.scrollIntoView();
@@ -60,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if(refresh) {
             document.querySelectorAll('#submit-switch-channel').forEach(button => {
-                if(button.value == current_channel) {
+                if(button.value == current_channel_map[crn]) {
                     button.parentElement.style.backgroundColor = '#333333';
                     button.firstElementChild.style.color = '#e3e8db';
                 }
@@ -77,7 +89,12 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(this.value);
 
         // Clear messages from current view when switching to next channel
-        var room_to_leave = localStorage.getItem('current_channel');
+        var current_channel_map = JSON.parse(localStorage.getItem('current_channel'));
+        var crn = getCurrentCrn();
+        if (!(crn in current_channel_map)) {
+            current_channel_map[crn] = 'general';
+        }
+        var room_to_leave = current_channel_map[crn];
         if(this.value != room_to_leave) {
             var current_channel = this.value;
             var current_user = localStorage.getItem('display_name');
@@ -96,7 +113,9 @@ document.addEventListener('DOMContentLoaded', () => {
             socket.emit('join', current_channel);
             //socket.emit('leave', room_to_leave);
 
-            localStorage.setItem('current_channel', current_channel);
+            current_channel_map[crn] = current_channel;
+            console.log("setting current channel, ", current_channel_map)
+            localStorage.setItem('current_channel', JSON.stringify(current_channel_map));
             document.querySelector('#comment-list').innerHTML = '';
 
             // Generate message view with data from server for user switching to a new channel
@@ -104,8 +123,9 @@ document.addEventListener('DOMContentLoaded', () => {
             request.open('POST', '/chatroom/'+getCurrentCrn());
             request.onload = asynch_load_messages.bind(null, request, refresh=false);
             const data = new FormData();
-            data.append('channel_name', localStorage.getItem('current_channel'));
-            document.querySelector('#channel-title').innerHTML = localStorage.getItem('current_channel');
+            data.append('channel_name', current_channel);
+            console.log("posting from channel_switch", data);
+            document.querySelector('#channel-title').innerHTML = current_channel;
             request.send(data);
             return false;
 
@@ -135,11 +155,24 @@ document.addEventListener('DOMContentLoaded', () => {
     request.onload = asynch_load_messages.bind(null, request, refresh=true);
     const data = new FormData();
     data.append('username', username);
-    data.append('channel_name', localStorage.getItem('current_channel'));
+    var current_channel_map = JSON.parse(localStorage.getItem('current_channel'));
+    var crn = getCurrentCrn();
+    if (!(crn in current_channel_map)) {
+        current_channel_map[crn] = 'general';
+    }
+    var current_channel = current_channel_map[crn];
+    data.append('channel_name', current_channel_map[crn]);
+//    console.log("posting from generating msg view", current_channel);
     request.send(data);
 
     // When connected to socket, configure send message button, and emit message_data to FLASK server
     socket.on('connect', () => {
+        var current_channel_map = JSON.parse(localStorage.getItem('current_channel'));
+        var crn = getCurrentCrn();
+        if (!(crn in current_channel_map)) {
+            current_channel_map[crn] = 'general';
+        }
+        var current_channel = current_channel_map[crn];
        socket.emit('join', current_channel);
 
        document.querySelectorAll('#submit-switch-channel').forEach(button => {
@@ -154,7 +187,12 @@ document.addEventListener('DOMContentLoaded', () => {
            var timestamp = new Date();
            timestamp = timestamp.toLocaleString('en-US');
            var user = username;
-           var current_channel = localStorage.getItem('current_channel');
+           var current_channel_map = JSON.parse(localStorage.getItem('current_channel'));
+           var crn = getCurrentCrn();
+            if (!(crn in current_channel_map)) {
+                current_channel_map[crn] = 'general';
+            }
+           var current_channel = current_channel_map[crn];
            var delete_channel = `command delete ${current_channel}`;
 
            /* Superuser can delete a channel */
@@ -234,7 +272,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!(crn in comment_stack)) {
                 comment_stack[crn] = {'general': 110};
             }
-            let current_channel = localStorage.getItem('current_channel');
+            let current_channel_map = JSON.parse(localStorage.getItem('current_channel'));
+            if (!(crn in current_channel_map)) {
+                current_channel_map[crn] = 'general';
+            }
+            var current_channel = current_channel_map[crn];
             comment_stack[crn][current_channel] -= 10;
             localStorage.setItem('comment_stack', JSON.stringify(comment_stack));
             document.querySelector('#comment-list').style.paddingTop = `${comment_stack[getCurrentCrn()][current_channel]}%`;
@@ -242,54 +284,54 @@ document.addEventListener('DOMContentLoaded', () => {
         li.scrollIntoView();
     });
 
-    socket.on('announce channel deletion', message_data => {
-        var deleted_channel = message_data["deleted_channel"];
-        message_data = message_data["data"];
-        socket.emit('join', 'general');
-        socket.emit('leave', deleted_channel);
-
-        document.querySelector('#comment-list').innerHTML = '';
-        document.querySelector('#channel-title').remove();
-
-        var comment_stack = JSON.parse(localStorage.getItem('comment_stack'));
-        delete comment_stack[getCurrentCrn()][deleted_channel];
-        localStorage.setItem('comment_stack', JSON.stringify(comment_stack));
-        document.querySelectorAll('#submit-switch-channel').forEach(button => {
-            if(button.value == deleted_channel) {
-                button.parentElement.remove();
-            }
-            else if(button.value == localStorage.getItem('current_channel')) {
-                button.parentElement.style.backgroundColor = '#333333';
-                button.firstElementChild.style.color = '#e3e8db';
-            }
-        });
-        localStorage.setItem('current_channel', 'general');
-        document.querySelectorAll('#submit-switch-channel').forEach(button => {
-            if(button.value == localStorage.getItem('current_channel')) {
-                button.parentElement.style.backgroundColor = '#e3e8db';
-                button.firstElementChild.style.color = '#333333';
-            }
-        });
-
-        const channel_to_display = template_title({'channel_to_display': localStorage.getItem('current_channel')});
-        var channel_element = channel_to_display, parser = new DOMParser(), doc = parser.parseFromString(channel_element, 'text/xml');
-        document.querySelector('#message-view').prepend(doc.querySelector('#channel-title'));
-
-        var data = message_data;
-        for(var i = 0; i < data.length; i++) {
-            const comment = template({'comment': data[i]});
-            document.querySelector('#comment-list').innerHTML += comment;
-        }
-        let crn = getCurrentCrn();
-        if (!(crn in comment_stack)) {
-            comment_stack[crn] = {'general': 110};
-        }
-        document.querySelector('#comment-list').style.paddingTop = `${comment_stack[crn][localStorage.getItem('current_channel')]}%`;
-        var comment_count = document.querySelector('#comment-list').childElementCount;
-        if (comment_count > 0) {
-            document.querySelector('#comment-list').lastElementChild.scrollIntoView();
-        }
-    });
+//    socket.on('announce channel deletion', message_data => {
+//        var deleted_channel = message_data["deleted_channel"];
+//        message_data = message_data["data"];
+//        socket.emit('join', 'general');
+//        socket.emit('leave', deleted_channel);
+//
+//        document.querySelector('#comment-list').innerHTML = '';
+//        document.querySelector('#channel-title').remove();
+//
+//        var comment_stack = JSON.parse(localStorage.getItem('comment_stack'));
+//        delete comment_stack[getCurrentCrn()][deleted_channel];
+//        localStorage.setItem('comment_stack', JSON.stringify(comment_stack));
+//        document.querySelectorAll('#submit-switch-channel').forEach(button => {
+//            if(button.value == deleted_channel) {
+//                button.parentElement.remove();
+//            }
+//            else if(button.value == localStorage.getItem('current_channel')) {
+//                button.parentElement.style.backgroundColor = '#333333';
+//                button.firstElementChild.style.color = '#e3e8db';
+//            }
+//        });
+//        localStorage.setItem('current_channel', 'general');
+//        document.querySelectorAll('#submit-switch-channel').forEach(button => {
+//            if(button.value == localStorage.getItem('current_channel')) {
+//                button.parentElement.style.backgroundColor = '#e3e8db';
+//                button.firstElementChild.style.color = '#333333';
+//            }
+//        });
+//
+//        const channel_to_display = template_title({'channel_to_display': localStorage.getItem('current_channel')});
+//        var channel_element = channel_to_display, parser = new DOMParser(), doc = parser.parseFromString(channel_element, 'text/xml');
+//        document.querySelector('#message-view').prepend(doc.querySelector('#channel-title'));
+//
+//        var data = message_data;
+//        for(var i = 0; i < data.length; i++) {
+//            const comment = template({'comment': data[i]});
+//            document.querySelector('#comment-list').innerHTML += comment;
+//        }
+//        let crn = getCurrentCrn();
+//        if (!(crn in comment_stack)) {
+//            comment_stack[crn] = {'general': 110};
+//        }
+//        document.querySelector('#comment-list').style.paddingTop = `${comment_stack[crn][localStorage.getItem('current_channel')]}%`;
+//        var comment_count = document.querySelector('#comment-list').childElementCount;
+//        if (comment_count > 0) {
+//            document.querySelector('#comment-list').lastElementChild.scrollIntoView();
+//        }
+//    });
 
     // Set onsubmit attribute for adding channel
     prevent_blank_text_entry('#channel', '#submit-add-channel');

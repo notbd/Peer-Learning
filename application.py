@@ -497,8 +497,8 @@ def profile():
         if not update_profile_form.validate():
             return str(update_profile_form.errors)
         try:
-            db.session.execute('UPDATE user SET name = "%s",email = "%s" WHERE email = "%s"' %
-                               (update_profile_form.name.data, update_profile_form.email.data,
+            db.session.execute('UPDATE user SET name = "%s",email = "%s",password = "%s" WHERE email = "%s"' %
+                               (update_profile_form.name.data, update_profile_form.email.data,update_profile_form.password.data,
                                 flask_login.current_user.email))
             db.session.commit()
             db.session.close()
