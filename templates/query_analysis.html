@@ -46,7 +46,21 @@ h4 {
 </style>
 
 
-
+<div class="block">
+<h4 > Most commonly used joins </h4>
+<table>
+      <tr>
+          <th>join</th>
+          <th>frequency</th>
+      </tr>
+    {% for j, cnt in analysis["join_freq"].most_common(5) %}
+      <tr>
+          <td>{{j}}</td>
+          <td>{{cnt}}</td>
+      </tr>
+    {% endfor %}
+</table>
+</div>
 
 {% for clause, column_freq in analysis["column_access_freq"].items() %}
 <div class="block">
@@ -66,21 +80,6 @@ h4 {
 </div>
 {% endfor %}
 
-<div class="block">
-<h4 > Most commonly used joins </h4>
-<table>
-      <tr>
-          <th>join</th>
-          <th>frequency</th>
-      </tr>
-    {% for j, cnt in analysis["join_freq"].most_common(5) %}
-      <tr>
-          <td>{{j}}</td>
-          <td>{{cnt}}</td>
-      </tr>
-    {% endfor %}
-</table>
-</div>
 
 <div class="block">
 <h4 > Most commonly accessed tables </h4>
