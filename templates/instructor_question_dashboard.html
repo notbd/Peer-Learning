@@ -1,5 +1,5 @@
 {% extends "base.html" %} {% import 'macros.html' as macros %}
-{% set nav_tabs = [("Home", "/dashboard/instructor/courses"), ("Profile", "/dashboard/instructor/profile"), ("Log out", "/logout")] %}
+{% set nav_tabs = [("Home", "/dashboard/instructor/courses"), ("Profile", "/dashboard/instructor/profile"), ("Sign Out", "/logout")] %}
 {% set active_tab = "Home" %}
 {% block content %}
 
@@ -90,8 +90,8 @@ $(document).ready(function(){
 <main role="main" class="inner cover">
     <!--question div-->
     <div style="background-color: #505c61; padding:10px;  overflow: hidden">
-        <button id="editQuestionBtn" style="float:right">Edit</button>
-        <button id="startQuestionBtn" style="float:right" data-qid="{{q.id}}" data-crn="{{q.CRN}}">
+        <button class="btn btn-warning btn-sm" id="editQuestionBtn" style="float:right">Edit</button>
+        <button class="btn btn-danger btn-sm" id="startQuestionBtn" style="float:right" data-qid="{{q.id}}" data-crn="{{q.CRN}}">
         {% if is_active %} End {% else %} Start {% endif %}
         </button>
         {% if q.schemas is not none %}
@@ -105,7 +105,7 @@ $(document).ready(function(){
         </div>
         {% endif %}
         <p id="question">{{q.question}}</p>
-        <button style="float:right" onclick="window.open('/analyze-responses/{{q.id}}','_blank')">Analyze responses</button>
+        <button class="btn btn-info" style="float:right" onclick="window.open('/analyze-responses/{{q.id}}','_blank')">Analyze responses</button>
     </div>
 
 
