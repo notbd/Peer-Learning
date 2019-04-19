@@ -47,7 +47,7 @@
 
       <form method="post">
         <input type="hidden" name="qid" value="{{question[0]}}">
-        <textarea name="response" rows="10" placeholder="Type your answer here:">{{response}}</textarea> <br>
+        <textarea name="response" rows="10" placeholder="Type your answer here (please use single quotation for quotation marks): ">{{response}}</textarea> <br>
         {% if msg is defined %}
         <small class="text-muted">{{msg}}</small>
         {% endif %}
