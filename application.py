@@ -607,12 +607,17 @@ present_channel = {"initial": "general"}
 
 @application.route('/chatroom/<CRN>', methods=["POST", "GET"])
 def index1(CRN):
+    title = db.session.execute(
+        'SELECT title FROM course '
+        'WHERE CRN="%s"' % CRN).fetchone()
+    title = title[0]
     channel_list = channel_list_by_course[CRN]
     print channel_list_by_course
     if request.method == "GET":
         # Pass channel list to, and use jinja to display already created channels
         # crn = request.args.get('crn')
-        return render_template("index1.html", channel_list=channel_list, user=flask_login.current_user.name, crn=CRN)
+        return render_template("index1.html", channel_list=channel_list, user=flask_login.current_user.name, crn=CRN, title = title)
+
 
     elif request.method == "POST":
         print "[INFO] POST request on /chatroom", request.form
@@ -664,7 +669,7 @@ def send_message(message_data):
 #     channel = message_data["current_channel"]
 #     user = message_data["user"]
 #     present_channel[user] = "general"
-#     del message_data["current_channel"]
+#     del message_data["current_channel"]gig
 #     del channel_list[channel]
 #     channel_list["general"].append(message_data)
 #     message_data = {"data": channel_list["general"], "deleted_channel": channel}

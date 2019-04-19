@@ -61,8 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if(refresh) {
             document.querySelectorAll('#submit-switch-channel').forEach(button => {
                 if(button.value == current_channel) {
-                    button.parentElement.style.backgroundColor = '#8C93B3';
-                    button.firstElementChild.style.color = '#171C2F';
+                    button.parentElement.style.backgroundColor = '#333333';
+                    button.firstElementChild.style.color = '#e3e8db';
                 }
             });
         }
@@ -84,12 +84,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             document.querySelectorAll('#submit-switch-channel').forEach(button => {
                 if(button.value == current_channel) {
-                    button.parentElement.style.backgroundColor = '#8C93B3';
-                    button.firstElementChild.style.color = '#171C2F';
+                    button.parentElement.style.backgroundColor = '#333333';
+                    button.firstElementChild.style.color = '#e3e8db';
                 }
                 else if(button.value == room_to_leave) {
-                    button.parentElement.style.backgroundColor = '#171C2F';
-                    button.firstElementChild.style.color = '#8C93B3';
+                    button.parentElement.style.backgroundColor = '#333333';
+                    button.firstElementChild.style.color = '#e3e8db';
                 }
             });
 
@@ -259,15 +259,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 button.parentElement.remove();
             }
             else if(button.value == localStorage.getItem('current_channel')) {
-                button.parentElement.style.backgroundColor = '#171C2F';
-                button.firstElementChild.style.color = '#8C93B3';
+                button.parentElement.style.backgroundColor = '#333333';
+                button.firstElementChild.style.color = '#e3e8db';
             }
         });
         localStorage.setItem('current_channel', 'general');
         document.querySelectorAll('#submit-switch-channel').forEach(button => {
             if(button.value == localStorage.getItem('current_channel')) {
-                button.parentElement.style.backgroundColor = '#8C93B3';
-                button.firstElementChild.style.color = '#171C2F';
+                button.parentElement.style.backgroundColor = '#e3e8db';
+                button.firstElementChild.style.color = '#333333';
             }
         });
 
