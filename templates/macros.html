@@ -73,14 +73,14 @@
 <div class="form-group control-group {% if field.errors %}error{% endif %}">
     <label>
         {{ field.label }}
-    </label> <br>
-    <table>
+    </label> 
+    <br>
+    <table style="color: white;">
         <tr>
             {% for subfield in field %}
             <td style="position: relative; bottom: 3px;">{{ subfield }}</td>
-            <td style="padding-right:10px;">{{ subfield.label }}</td>
+            <td style="padding-right:3rem;">{{ subfield.label }}</td>
             {% endfor %}
-
         </tr>
     </table>
     {% if field.errors %}
